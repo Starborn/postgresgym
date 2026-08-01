@@ -148,9 +148,59 @@ table.spot td:first-child{font-weight:800;white-space:nowrap}
 .how.mcp{background:var(--plate)}
 .how.byo{background:transparent}
 
-.drill,.mach{scroll-margin-top:64px}
+.drill,.mach,.lesson,.rule{scroll-margin-top:64px}
 .flash{animation:flash 1.6s ease-out}
 @keyframes flash{0%,32%{box-shadow:0 0 0 5px var(--plate)}100%{box-shadow:0 0 0 0 transparent}}
+/* ---- induction ---- */
+.orient{background:var(--ink);color:var(--chalk);border:var(--rule);padding:20px 22px;margin-bottom:28px}
+.orient h3{color:var(--plate);font-size:17px;margin-bottom:8px}
+.orient p{margin:0 0 14px;max-width:66ch;color:#D3DBE2;font-size:15px}
+.orient p:last-child{margin-bottom:0}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:16px}
+.tier{border:2px solid #4C5862;padding:12px}
+.tier b{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--plate);margin-bottom:4px}
+.tier span{font-size:13.5px;color:#C2CBD3;line-height:1.45}
+.tier.here{border-color:var(--plate);background:#212A32}
+
+.lesson{background:var(--chalk);border:var(--rule);margin-bottom:16px;padding:18px 20px}
+.lesson.done{border-color:#2E7D46}
+.lhead{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px}
+.lnum{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--chalk);background:var(--slonik);
+  width:30px;height:30px;display:grid;place-items:center;flex:none}
+.lesson.done .lnum{background:#2E7D46}
+.lhead h3{font-size:18px;margin:0}
+.goal{font-family:"IBM Plex Mono",monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-top:3px}
+.lesson .explain{font-size:15.5px;max-width:66ch;margin:0 0 16px}
+.lesson .explain b{font-weight:800}
+.lesson .explain code{background:var(--slonik-lite);padding:1px 5px;font-size:13.5px}
+.sub{font-family:"IBM Plex Mono",monospace;font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--ink-soft);border-top:var(--rule-thin);padding-top:6px;margin:18px 0 8px}
+.egnote{font-size:14.5px;color:var(--ink-soft);max-width:66ch;margin:10px 0 0}
+.task{font-size:15.5px;max-width:66ch;margin:0 0 10px}
+.task b{font-weight:800}
+
+/* ---- theory ---- */
+.rule{background:var(--chalk);border:var(--rule);margin-bottom:14px;padding:16px 18px}
+.rhead{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:10px}
+.rnum{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.08em;
+  background:var(--ink);color:var(--chalk);padding:3px 8px;white-space:nowrap}
+.rhead h3{font-size:17px;flex:1;min-width:180px}
+.verd{font-family:"IBM Plex Mono",monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;
+  padding:3px 9px;border:2px solid;white-space:nowrap;font-weight:600}
+.verd.yes{border-color:#2E7D46;background:#DFF0E4;color:#1F6135}
+.verd.part{border-color:var(--plate);background:#FBEBCC;color:#8A5B04}
+.verd.no{border-color:#B03B2F;background:#F7DEDA;color:#8C2C22}
+.verd.na{border-color:var(--ink-soft);background:var(--mat);color:var(--ink-soft)}
+.claim{font-size:15.5px;max-width:68ch;margin:0 0 10px;padding-left:12px;border-left:4px solid var(--slonik)}
+.rwhy{font-size:15px;max-width:68ch;margin:0 0 12px;color:var(--ink)}
+.rwhy code,.claim code{background:var(--slonik-lite);padding:1px 5px;font-size:13px;font-family:"IBM Plex Mono",monospace}
+.proof summary{list-style:none;cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:11px;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--slonik);border-top:var(--rule-thin);padding-top:9px}
+.proof summary::-webkit-details-marker{display:none}
+.proof summary::before{content:"▸ "}
+.proof[open] summary::before{content:"▾ "}
+.proof .pad{margin-top:10px}
+
 footer{padding:44px 0 64px;color:var(--ink-soft);font-size:14px}
 footer h2{font-size:22px;color:var(--ink);margin-bottom:12px}
 footer p{max-width:64ch}
@@ -171,12 +221,15 @@ footer p{max-width:64ch}
       <div class="bar" role="img" aria-label="Training transfer meter">
         <i class="p" id="barP" style="width:0%"></i><i class="l" id="barL" style="width:0%"></i>
       </div>
-      <div class="meter-txt" id="meterTxt">0 / 8 drills</div>
+      <div class="meter-txt" id="meterTxt">0/6 lessons · 0/8 drills</div>
     </div>
     <nav>
+      <a href="#induction">Start here</a>
+      <a href="#theory">Theory</a>
       <a href="#floor">Floor</a>
       <a href="#machines">Machines</a>
       <a href="#spotters">Spotters</a>
+      <a href="postgres-gym-manual.md">Manual</a>
     </nav>
   </div>
 </header>
@@ -184,8 +237,9 @@ footer p{max-width:64ch}
 <main>
 <div class="hero">
   <div class="wrap">
-    <p class="eyebrow">Postgres 17 · compiled to WebAssembly · running on this page</p>
+    <p class="eyebrow">Postgres 18 · compiled to WebAssembly · running on this page</p>
     <h1>Train on the<br>engine before<br>you pick the <em>vendor</em>.</h1>
+    <p class="lede" style="font-size:19px;color:var(--ink)"><b>New to all this? <a href="#induction">Start with the Induction</a> — six lessons, no experience assumed.</b></p>
     <p class="lede">Fourteen companies sell you a managed database. Most of what you need to know belongs to Postgres itself and follows you when you leave. This gym separates the two, and tells you which is which on every drill.</p>
 
     <div class="console">
@@ -194,10 +248,7 @@ footer p{max-width:64ch}
         <span>scratch database · nothing leaves your browser</span>
       </div>
       <label for="scratch" class="visually-hidden" style="position:absolute;left:-9999px">Scratch SQL</label>
-      <textarea id="scratch" spellcheck="false" placeholder="select version();">select name, owner, engine, billing_unit, funding_usd_m
-from vendors
-where wire_compatible
-order by name;</textarea>
+      <textarea id="scratch" spellcheck="false" placeholder="select version();">select * from vendors;</textarea>
       <div class="console-foot">
         <button id="runScratch" disabled>Run query</button>
         <button class="ghost" id="schemaBtn" disabled>Show schema</button>
@@ -207,6 +258,44 @@ order by name;</textarea>
     </div>
   </div>
 </div>
+
+<section id="induction">
+  <div class="wrap">
+    <div class="orient">
+      <h3>Never used a database? Start here.</h3>
+      <p><b>What Postgres is.</b> A program that stores tables and answers questions about them. A table is rows and columns, much like a spreadsheet, except the rules about what may go in each column are enforced rather than hoped for. Postgres began at Berkeley in 1986, so it is neither new nor a new kind of thing. Everyone is building on it now because it is old, free, and has stopped surprising people.</p>
+      <p><b>What the questions look like.</b> You ask in SQL, a language designed to read almost like English: <code style="background:#2A333C;padding:1px 6px">select name from vendors where owner = 'Amazon'</code>. Six lessons below take you from nothing to reading that comfortably.</p>
+      <div class="tiers">
+        <div class="tier here"><b>1 · Induction</b><span>Six guided lessons. Each one explains an idea, shows a worked example you can run, then asks you to try a variation. You are here.</span></div>
+        <div class="tier"><b>2 · The Theory</b><span>Codd's twelve rules, judged against the database on this page. Read-only unless you want to run the evidence.</span></div>
+        <div class="tier"><b>3 · The Floor</b><span>Eight harder drills with no worked example. Portable Postgres that transfers to any vendor.</span></div>
+        <div class="tier"><b>4 · The Machines</b><span>Fourteen platform cards. What each company sells, and how much of it you keep if you leave.</span></div>
+      </div>
+    </div>
+
+    <div class="sec-head">
+      <h2>The Induction</h2>
+      <span class="tag port">No experience assumed</span>
+    </div>
+    <p class="sec-lede">Everything runs against the real database on this page, so nothing can break and nothing is being saved. Get something wrong and Postgres tells you why. That is the fastest way to learn it.</p>
+    <div id="lessons"></div>
+  </div>
+</section>
+
+<section id="theory">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>The Theory</h2>
+      <span class="tag port">Read it. Running anything is optional.</span>
+    </div>
+    <p class="sec-lede">Codd published twelve rules in <i>Computerworld</i> in October 1985, defining what a database must do to call itself relational. Forty years on they remain the sharpest available test, and almost uniquely among foundational texts they can be checked against a running system rather than argued about. Each rule below is stated in our own words, judged, and backed by a demonstration you can run against the Postgres on this page if you want to. The verdict is the point; the SQL is evidence, folded away.</p>
+    <p class="sec-lede" style="margin-top:-16px"><b>Three of the twelve fail or partly fail</b>, and those are the interesting ones. Where SQL departs from the relational model, it departs deliberately, and the departures have consequences you meet in production.</p>
+    <div id="rules"></div>
+    <div class="notice">
+      <b>Reading the sources.</b> The ACM Digital Library became fully open access on 1 January 2026, so Codd's papers are now free to read. Start with <i>A Relational Model of Data for Large Shared Data Banks</i> (CACM 13(6), 1970) at <a href="https://doi.org/10.1145/362384.362685" target="_blank" rel="noopener">doi.org/10.1145/362384.362685</a>. For rule 3 specifically, <i>Missing Information (Applicable and Inapplicable) in Relational Databases</i> (SIGMOD Record 15, 1986) is the argument he made when SQL had already gone the other way. The twelve rules themselves appeared in trade press rather than in ACM, and are restated here rather than reproduced.
+    </div>
+  </div>
+</section>
 
 <section id="floor">
   <div class="wrap">
@@ -256,7 +345,7 @@ order by name;</textarea>
   <div class="wrap">
     <h2>What this prototype is</h2>
     <p>A working skeleton: real Postgres in the browser via PGlite, eight drills with automatic checking, fourteen platform cards, and a connection matrix. Curriculum, accounts, and progress persistence are not built. Vendor facts carry a date and will rot — pricing, ownership and feature claims in this market change monthly.</p>
-    <p style="margin-top:14px"><span class="mono" style="font-size:12px">Vendor data compiled 27 July 2026 · engine: PGlite (Postgres 17, WASM) · no analytics, no cookies, no account</span></p>
+    <p style="margin-top:14px"><span class="mono" style="font-size:12px">Vendor data compiled 27 July 2026 · engine: PGlite (Postgres 18.3, WASM) · no analytics, no cookies, no account</span></p>
   </div>
 </footer>
 </main>
@@ -551,14 +640,26 @@ function fail(i,msg){
   v.className='verdict fail'; v.textContent='\u2717 '+msg;
 }
 function score(){
-  const done=document.querySelectorAll('.drill.done').length, total=DRILLS.length;
-  $('#barP').style.width = (done/total*100)+'%';
+  const li=document.querySelectorAll('.lesson.done').length, dr=document.querySelectorAll('.drill.done').length;
+  const total=LESSONS.length+DRILLS.length;
+  $('#barP').style.width = ((li+dr)/total*100)+'%';
   $('#barL').style.width = '0%';
-  $('#meterTxt').textContent = `${done} / ${total} drills \u00b7 all portable`;
+  $('#meterTxt').textContent = `${li}/${LESSONS.length} lessons \u00b7 ${dr}/${DRILLS.length} drills`;
 }
 
 document.addEventListener('click', e=>{
   const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.rrun!==undefined) runInto(document.getElementById('rs'+b.dataset.rrun).value,'ro'+b.dataset.rrun);
+  if(b.dataset.eg!==undefined) runInto(document.getElementById('eg'+b.dataset.eg).value,'ego'+b.dataset.eg);
+  if(b.dataset.lrun!==undefined) runInto(document.getElementById('lt'+b.dataset.lrun).value,'lo'+b.dataset.lrun);
+  if(b.dataset.lcheck!==undefined) checkLesson(+b.dataset.lcheck);
+  if(b.dataset.lans!==undefined){
+    const i=b.dataset.lans;
+    document.getElementById('lt'+i).value=LESSONS[i].ans;
+    runInto(LESSONS[i].ans,'lo'+i);
+    const v=document.getElementById('lv'+i);
+    v.className='verdict'; v.textContent='Answer filled in and run. Read it against the task, then press Check.';
+  }
   if(b.dataset.run!==undefined) runInto(document.getElementById('t'+b.dataset.run).value,'o'+b.dataset.run);
   if(b.dataset.check!==undefined) check(+b.dataset.check);
   if(b.dataset.reset!==undefined){
@@ -580,7 +681,218 @@ function gotoHash(){
 }
 window.addEventListener('hashchange', gotoHash);
 
-renderMachines(); renderSpot(); renderDrills(); gotoHash(); boot();
+/* ---------------- induction ---------------- */
+const LESSONS = [
+ {t:'Look at a whole table',
+  goal:'Goal: read a table, and know what a row and a column are',
+  ex:`A <b>table</b> holds one kind of thing. Each <b>row</b> is one of those things; each <b>column</b> is one fact about it. This database has two tables. <code>vendors</code> has fourteen rows, one per company selling a database. <code>rounds</code> has seven rows, one per funding event.<br><br>
+  Asking for everything uses a star. Read <code>select * from vendors</code> as "show me every column, from the vendors table". The semicolon marks the end of the question.`,
+  eg:`select * from vendors;`,
+  egnote:'Fourteen rows come back, one per company. Scroll sideways to see all the columns. Some cells say NULL — lesson six explains those.',
+  task:'The other table is called <b>rounds</b>. Show everything in it.',
+  ref:'select * from rounds',
+  ans:'select * from rounds;'},
+
+ {t:'Pick the columns you want',
+  goal:'Goal: ask for two columns instead of all of them',
+  ex:`Whole tables are usually too wide to read. Instead of the star, name the columns you want, separated by commas, and Postgres returns only those.<br><br>
+  Column names have no quotation marks around them. Order is up to you: asking for <code>owner, name</code> puts owner first.`,
+  eg:`select name, owner from vendors;`,
+  egnote:'Still fourteen rows, because you have not filtered anything away. Just two columns instead of ten.',
+  task:'Show the <b>name</b> and the <b>billing_unit</b> of every vendor. That second column says how each company charges you.',
+  ref:'select name, billing_unit from vendors',
+  ans:'select name, billing_unit from vendors;'},
+
+ {t:'Pick the rows you want',
+  goal:'Goal: filter down to the rows that match a condition',
+  ex:`<code>where</code> keeps only rows that pass a test, and it goes after the table name. Everything failing the test is left out.<br><br>
+  One rule catches everybody at first: <b>text values need single quotes, column names do not</b>. In <code>where owner = 'Amazon'</code>, <code>owner</code> is a column so it stays bare, and <code>'Amazon'</code> is a piece of text so it gets quotes. Swap them and Postgres will tell you the column Amazon does not exist.`,
+  eg:`select name, owner from vendors where owner = 'Amazon';`,
+  egnote:'Three rows now instead of fourteen. Amazon sells three of the databases in this table.',
+  task:'Show the <b>name</b> and <b>engine</b> of vendors whose <b>engine</b> is <code>postgres</code>. Watch the quotes.',
+  ref:"select name, engine from vendors where engine = 'postgres'",
+  ans:"select name, engine from vendors where engine = 'postgres';"},
+
+ {t:'Put them in order',
+  goal:'Goal: sort the answer, largest first',
+  ex:`Rows come back in no particular order unless you ask. <code>order by</code> sorts them, and it goes last.<br><br>
+  Sorting runs smallest-to-largest by default, or A to Z for text. Adding <code>desc</code> reverses it. Nothing about the stored data changes; only this one answer is arranged.`,
+  eg:`select name, funding_usd_m from vendors order by name;`,
+  egnote:'Alphabetical by company name. Try changing name to funding_usd_m and see what happens.',
+  task:'Show <b>name</b> and <b>funding_usd_m</b> for every vendor, <b>largest funding first</b>. Something odd happens at the top of the result — lesson six is about exactly that.',
+  ref:'select name, funding_usd_m from vendors order by funding_usd_m desc',
+  ans:'select name, funding_usd_m from vendors order by funding_usd_m desc;'},
+
+ {t:'Count things',
+  goal:'Goal: get one number back instead of a list',
+  ex:`<code>count(*)</code> counts rows. Rather than listing them, Postgres returns a single number in a single row.<br><br>
+  Combining it with <code>where</code> counts only the matching rows, which is how most real questions get answered: how many of these, how many of those.`,
+  eg:`select count(*) from vendors where owner = 'Amazon';`,
+  egnote:'One row, one number: 3. Drop the where clause and you get 14.',
+  task:'How many rows are in the <b>rounds</b> table? One number, no filtering.',
+  ref:'select count(*) from rounds',
+  ans:'select count(*) from rounds;'},
+
+ {t:'Empty boxes',
+  goal:'Goal: handle missing information without getting it wrong',
+  ex:`Several cells in this table are blank, shown as <b>NULL</b>. That means unknown, and it differs from zero. Supabase has no funding figure here because the reporting never disclosed one, which is a different fact from having raised nothing.<br><br>
+  Because NULL means unknown, comparing to it never works: <code>= null</code> returns nothing at all, since Postgres cannot confirm that an unknown equals anything. Ask <code>is null</code> instead.<br><br>
+  This is why lesson four looked strange. Sorting largest-first puts NULL above every real number, so the blanks float to the top.`,
+  eg:`select name, valuation_usd_m from vendors where valuation_usd_m is null;`,
+  egnote:'Twelve vendors have no published valuation. Now try = null in place of is null: zero rows, no error, no warning. That silence is the danger.',
+  task:'Show the <b>name</b> of every vendor whose <b>funding_usd_m</b> is empty.',
+  ref:'select name from vendors where funding_usd_m is null',
+  ans:'select name from vendors where funding_usd_m is null;'}
+];
+
+function renderLessons(){
+  $('#lessons').innerHTML = LESSONS.map((l,i)=>`
+    <section class="lesson" id="L${i}">
+      <div class="lhead">
+        <span class="lnum">${i+1}</span>
+        <div><h3>${l.t}</h3><div class="goal">${l.goal}</div></div>
+      </div>
+      <p class="explain">${l.ex}</p>
+
+      <div class="sub">Worked example</div>
+      <div class="pad">
+        <textarea id="eg${i}" spellcheck="false" style="min-height:44px">${l.eg}</textarea>
+        <div class="drow"><button data-eg="${i}">Run this example</button>
+          <span class="hint">Change it and run again — nothing can break</span></div>
+      </div>
+      <div id="ego${i}" class="out" style="padding-left:0;padding-right:0"></div>
+      <p class="egnote">${l.egnote}</p>
+
+      <div class="sub">Your turn</div>
+      <p class="task">${l.task}</p>
+      <div class="pad">
+        <textarea id="lt${i}" spellcheck="false" placeholder="Write your query here, then press Check"></textarea>
+        <div class="drow">
+          <button data-lrun="${i}">Run</button>
+          <button class="ghost" data-lcheck="${i}">Check</button>
+          <button class="ghost" data-lans="${i}">Show answer</button>
+        </div>
+      </div>
+      <div id="lo${i}" class="out" style="padding-left:0;padding-right:0"></div>
+      <div id="lv${i}" class="verdict"></div>
+    </section>`).join('');
+}
+
+async function checkLesson(i){
+  const l=LESSONS[i], v=document.getElementById('lv'+i), sql=document.getElementById('lt'+i).value.trim();
+  if(!ready){ v.className='verdict fail'; v.textContent='Engine not ready yet — give it a second.'; return; }
+  if(!sql){ v.className='verdict fail'; v.textContent='Nothing to check yet. Write a query in the box above, or press Show answer.'; return; }
+  try{
+    const mine=await db.query(sql), want=await db.query(l.ref);
+    if(norm(mine.rows)===norm(want.rows)){
+      v.className='verdict pass'; v.textContent='\u2713 Correct — '+want.rows.length+' row(s), exactly right.';
+      document.getElementById('L'+i).classList.add('done'); score();
+    }else{
+      v.className='verdict fail';
+      v.textContent=`\u2717 Not quite. Yours returned ${mine.rows.length} row(s); the answer has ${want.rows.length}. `+
+        (mine.rows.length>want.rows.length?'Yours has too many — check the where clause.':
+         mine.rows.length<want.rows.length?'Yours has too few — the filter may be too narrow.':
+         'Right number of rows, so check the columns you asked for.');
+    }
+  }catch(e){
+    v.className='verdict fail';
+    v.textContent='\u2717 Postgres could not read that: '+(e.message||e)+'  \u2014 read the message, it usually names the problem.';
+  }
+}
+
+/* ---------------- Codd's rules ---------------- */
+const RULES = [
+ {n:'Rule 0', t:'The foundation rule', v:'yes', vl:'Honoured',
+  claim:'A system calling itself relational must manage the database through its relational facilities alone. No side doors.',
+  why:`Configuration, permissions, schema changes and data all move through SQL in Postgres. Even the server's own settings are exposed as a table you can query, which is the shape Codd was arguing for: one language, no privileged back channel.`,
+  sql:`select name, setting from pg_settings\nwhere name in ('server_version','search_path');`},
+
+ {n:'Rule 1', t:'The information rule', v:'yes', vl:'Honoured',
+  claim:'Every piece of information is represented in exactly one way: as a value, in a column, in a row, in a table. Nothing is held in pointers, ordering, or file position.',
+  why:`Radical in 1970, when data was reached by following pointers through hierarchies and networks. The demonstration retrieves a stored fact and a fact about the schema by identical means, because both are values in tables. One caveat: Postgres exposes <code>ctid</code>, the physical row address, which is a small logical-level leak of storage detail.`,
+  sql:`(select 'a stored datum' as kind, name as value from vendors limit 2)\nunion all\n(select 'a fact about the schema', tablename from pg_tables where schemaname='public' limit 2);`},
+
+ {n:'Rule 2', t:'The guaranteed access rule', v:'part', vl:'Partly honoured',
+  claim:'Every single datum is reachable by naming three things and nothing else: its table, its primary key value, its column.',
+  why:`Holds whenever a primary key exists. But SQL permits tables without one, and therefore permits duplicate rows, so a table is a bag rather than a set. The demonstration creates two identical rows: at the logical level they cannot be told apart, so neither is individually addressable. Codd regarded this as a defect, and it is the departure from the model that Date and Darwen pressed hardest on.`,
+  sql:`drop table if exists codd_dup;\ncreate table codd_dup (x int);\ninsert into codd_dup values (1),(1);\nselect ctid as "physical address", x as "logical value" from codd_dup;`},
+
+ {n:'Rule 3', t:'Systematic treatment of null values', v:'no', vl:'Not honoured',
+  claim:'Missing information must be represented systematically, independently of data type, and distinctly from empty strings, zeros, or any ordinary value.',
+  why:`Postgres gets the easy half right: one NULL, every type, never confusable with zero. It fails the half Codd cared about most. He argued for <b>two</b> marks, missing-but-applicable and missing-and-inapplicable, and SQL gives one mark doing both jobs. So a vendor with an undisclosed valuation and a vendor that cannot have one are recorded identically. The demonstration also shows the three-valued logic that follows: comparing anything to NULL yields neither true nor false.`,
+  sql:`select (null = null)   as "null = null",\n       (null is null)  as "null is null",\n       (case when null = null then 'matched' else 'did not match' end) as "so the case says";`},
+
+ {n:'Rule 4', t:'Dynamic online catalog based on the relational model', v:'yes', vl:'Honoured',
+  claim:'The description of the database is itself stored as tables, and queried with the same language used for ordinary data.',
+  why:`Passed emphatically, and it is the most philosophically satisfying of the twelve. The database describes itself in its own terms, with no separate metadata language and no privileged inspection tool. Self-description of exactly this kind is what later made schema migration, ORMs and introspection tooling possible at all.`,
+  sql:`select tablename as "tables, described as data"\nfrom pg_catalog.pg_tables where schemaname='public'\nunion all\nselect 'the catalog itself holds '||count(*)||' relations' from pg_catalog.pg_class;`},
+
+ {n:'Rule 5', t:'The comprehensive data sublanguage rule', v:'yes', vl:'Honoured',
+  claim:'One language must express all of it: defining data, defining views, manipulating data, integrity constraints, authorisation, and transaction boundaries.',
+  why:`SQL covers every item on the list. Whether it does so elegantly is a separate argument, and Codd himself grew unhappy with SQL as the realisation of his ideas. But the requirement is comprehensiveness rather than beauty, and on that test it passes.`,
+  sql:`drop view if exists codd_v;\ncreate view codd_v as select name from vendors where wire_compatible;\nselect count(*) as "rows visible through a view defined in the same language" from codd_v;`},
+
+ {n:'Rule 6', t:'The view updating rule', v:'part', vl:'Partly honoured',
+  claim:'Every view that is theoretically updatable must actually be updatable by the system.',
+  why:`Simple views update straight through. Anything involving aggregation, grouping or set operations refuses, and the demonstration triggers exactly that refusal. Postgres offers INSTEAD OF triggers as a manual escape, which concedes the point: the system is not determining updatability by itself, you are. Determining it in general turns out to be genuinely hard, which is why no product fully satisfies this rule.`,
+  sql:`drop view if exists codd_agg;\ncreate view codd_agg as select engine, count(*) as n from vendors group by engine;\nupdate codd_agg set engine = 'x';`,
+  sqlnote:'Expect an error. The error is the result.'},
+
+ {n:'Rule 7', t:'High-level insert, update and delete', v:'yes', vl:'Honoured',
+  claim:'The system must treat a set of rows as a single operand for writing, not only for reading. One statement, many rows.',
+  why:`Set-at-a-time thinking is the whole argument, and the reason SQL beat record-at-a-time navigation. It is also why the syntax feels alien to anyone arriving from procedural programming: you describe the set you want changed and let the system work out the traversal.`,
+  sql:`update vendors set funding_usd_m = funding_usd_m where engine = 'postgres';\nselect count(*) as "rows changed by that one statement" from vendors where engine='postgres';`},
+
+ {n:'Rule 8', t:'Physical data independence', v:'yes', vl:'Honoured',
+  claim:'Changing how data is stored or reached must not change what applications get back, nor require them to be rewritten.',
+  why:`The demonstration answers one question twice over fifty thousand rows, once through an index and once through a full scan, and the answer is identical. Storage strategy is the database's business. This rule, and the two following, are the deepest of the twelve: they are arguments that logical meaning must be independent of implementation, made twenty-five years before anyone worried about vendor lock-in.`,
+  sql:`drop table if exists codd_phys;\ncreate table codd_phys as select g from generate_series(1,50000) g;\ncreate index codd_phys_g on codd_phys (g);\nanalyze codd_phys;\nset enable_seqscan = off;\ncreate temp table codd_a as select count(*) c from codd_phys where g = 500;\nset enable_seqscan = on;\nset enable_indexscan = off; set enable_bitmapscan = off;\ncreate temp table codd_b as select count(*) c from codd_phys where g = 500;\nset enable_indexscan = on; set enable_bitmapscan = on;\nselect codd_a.c as "answer via the index", codd_b.c as "answer via a full scan" from codd_a, codd_b;`},
+
+ {n:'Rule 9', t:'Logical data independence', v:'part', vl:'Partly honoured',
+  claim:'Splitting or restructuring the underlying tables, in ways that preserve information, must leave applications working unchanged.',
+  why:`The demonstration splits vendors into two tables and rebuilds the original shape as a view. Reads carry on exactly as before, so queries survive a schema restructure they know nothing about. Writes are where it weakens, since writing through such a view runs into rule 6. Partial rather than full, and the limit is the same limit.`,
+  sql:`drop view if exists codd_recombined;\ndrop table if exists codd_core; drop table if exists codd_fin;\ncreate table codd_core as select id,name,engine from vendors;\ncreate table codd_fin  as select id,funding_usd_m from vendors;\ncreate view codd_recombined as\n  select c.id,c.name,c.engine,f.funding_usd_m from codd_core c join codd_fin f using (id);\nselect name as "queried through a rebuilt shape" from codd_recombined where engine='postgres';`},
+
+ {n:'Rule 10', t:'Integrity independence', v:'yes', vl:'Honoured',
+  claim:'Integrity rules must be expressible in the database language and held in the catalog, never buried in application code.',
+  why:`A constraint declared once is enforced against every writer for as long as the table exists, including writers nobody has written yet. Application-level validation protects only the paths someone remembered. The demonstration shows the rule stored as data in the catalog; try inserting a negative age afterwards and the database refuses.`,
+  sql:`drop table if exists codd_age;\ncreate table codd_age (age int check (age >= 0));\nselect conname as "rule name", pg_get_constraintdef(oid) as "rule, stored in the catalog"\nfrom pg_constraint where conrelid='codd_age'::regclass;`,
+  sqlnote:'Then run: insert into codd_age values (-1); — the database will refuse it.'},
+
+ {n:'Rule 11', t:'Distribution independence', v:'na', vl:'Not testable here',
+  claim:'Applications must not need to know, or change, when data is spread across several machines.',
+  why:`Cannot be shown on a single-node database in a browser tab, and saying so is more honest than faking it. Worth knowing this is the rule the modern market is still fighting over: Aurora DSQL, Citus and CockroachDB all exist to make distribution invisible, and all of them make you give something up in exchange. Codd wanted it free. Forty years on it is still not free.`,
+  sql:null},
+
+ {n:'Rule 12', t:'The nonsubversion rule', v:'part', vl:'Partly honoured',
+  claim:'If a low-level interface exists, it must not be usable to bypass the integrity rules expressed at the higher level.',
+  why:`Constraints hold across ordinary write paths, including bulk loading. But a superuser can set <code>session_replication_role</code> to replica, which suspends foreign key enforcement, and the demonstration uses it to insert a row referencing a parent that does not exist. Postgres provides the escape hatch deliberately, for replication and restore. Rule 12 says it should not be reachable at all. Knowing it exists is the reason to treat superuser access as something quite different from ordinary access.`,
+  sql:`drop table if exists codd_fk2; drop table if exists codd_fk1 cascade;\ncreate table codd_fk1 (id int primary key);\ncreate table codd_fk2 (ref int references codd_fk1(id));\nset session_replication_role = replica;\ninsert into codd_fk2 values (999);\nset session_replication_role = origin;\nselect ref as "an orphan the constraint should have prevented" from codd_fk2;`}
+];
+
+function renderRules(){
+  $('#rules').innerHTML = RULES.map((r,i)=>`
+    <article class="rule" id="R${i}">
+      <div class="rhead">
+        <span class="rnum">${r.n}</span>
+        <h3>${r.t}</h3>
+        <span class="verd ${r.v}">${r.vl}</span>
+      </div>
+      <p class="claim">${r.claim}</p>
+      <p class="rwhy">${r.why}</p>
+      ${r.sql ? `<details class="proof">
+        <summary>See for yourself</summary>
+        <div class="pad">
+          <textarea id="rs${i}" spellcheck="false" style="min-height:${Math.min(190,40+r.sql.split('\n').length*20)}px">${r.sql}</textarea>
+          <div class="drow"><button data-rrun="${i}">Run this</button>
+            ${r.sqlnote?`<span class="hint">${r.sqlnote}</span>`:''}</div>
+        </div>
+        <div id="ro${i}" class="out" style="padding-left:0;padding-right:0"></div>
+      </details>` : ''}
+    </article>`).join('');
+}
+
+renderMachines(); renderSpot(); renderLessons(); renderRules(); renderDrills(); gotoHash(); boot();
 </script>
 </body>
 </html>
