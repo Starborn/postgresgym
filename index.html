@@ -148,6 +148,9 @@ table.spot td:first-child{font-weight:800;white-space:nowrap}
 .how.mcp{background:var(--plate)}
 .how.byo{background:transparent}
 
+.drill,.mach{scroll-margin-top:64px}
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%,32%{box-shadow:0 0 0 5px var(--plate)}100%{box-shadow:0 0 0 0 transparent}}
 footer{padding:44px 0 64px;color:var(--ink-soft);font-size:14px}
 footer h2{font-size:22px;color:var(--ink);margin-bottom:12px}
 footer p{max-width:64ch}
@@ -413,8 +416,9 @@ const SPOT = [
 
 /* ---------------- render ---------------- */
 function renderMachines(){
+  const slug = n => 'm-'+n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   $('#machines-grid').innerHTML = MACHINES.map(m=>`
-    <article class="mach">
+    <article class="mach" id="${slug(m.n)}">
       <h3>${m.n}</h3>
       <div class="owner">${m.o}</div>
       <p class="trains">${m.t}</p>
@@ -565,7 +569,18 @@ document.addEventListener('click', e=>{
   }
 });
 
-renderMachines(); renderSpot(); renderDrills(); boot();
+/* ---------------- deep links from the manual ---------------- */
+function gotoHash(){
+  const h=location.hash.slice(1); if(!h) return;
+  const el=document.getElementById(h); if(!el) return;
+  if(el.tagName==='DETAILS') el.open=true;
+  el.classList.add('flash');
+  setTimeout(()=>el.classList.remove('flash'),1600);
+  requestAnimationFrame(()=>el.scrollIntoView({block:'start'}));
+}
+window.addEventListener('hashchange', gotoHash);
+
+renderMachines(); renderSpot(); renderDrills(); gotoHash(); boot();
 </script>
 </body>
 </html>
