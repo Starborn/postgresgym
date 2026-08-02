@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training Manual — The Postgres Gym</title>
+<meta name="description" content="Companion manual to the Postgres Gym: vocabulary, worked drills, platform briefs and Codd's twelve rules.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--mat:#C7CCD1;--mat-deep:#AEB5BC;--chalk:#F8F6F1;--ink:#13181D;--ink-soft:#4A545E;
+--slonik:#2F5F87;--slonik-lite:#DCE6EE;--lock:#9E2C74;--plate:#DE9612;--rule:3px solid var(--ink);}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--mat);color:var(--ink);font-family:Archivo,system-ui,sans-serif;
+  font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.rail{position:sticky;top:0;z-index:50;background:var(--ink);color:var(--chalk);border-bottom:var(--rule)}
+.rail-in{max-width:1180px;margin:0 auto;padding:9px 20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.mark{font-weight:900;text-transform:uppercase;letter-spacing:.04em;font-size:14px}
+.mark span{color:var(--plate)}
+.rail a{color:var(--chalk);text-decoration:none;font-size:12px;text-transform:uppercase;font-weight:600;
+  letter-spacing:.06em;border-bottom:2px solid transparent;padding-bottom:2px}
+.rail a:hover{border-bottom-color:var(--plate)}
+.shell{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:236px minmax(0,1fr);gap:34px;padding:0 20px}
+aside{position:sticky;top:56px;align-self:start;max-height:calc(100vh - 70px);overflow-y:auto;padding:26px 0 40px}
+aside .lab{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-soft);border-bottom:1.5px solid var(--ink);padding-bottom:5px;margin-bottom:10px}
+aside a{display:block;font-size:13.2px;color:var(--ink-soft);text-decoration:none;padding:3px 0 3px 9px;
+  border-left:2px solid var(--mat-deep);line-height:1.35}
+aside a:hover{color:var(--slonik);border-left-color:var(--slonik);background:var(--slonik-lite)}
+main{background:var(--chalk);border-left:var(--rule);border-right:var(--rule);padding:34px 42px 70px;min-width:0}
+main>h1{font-size:clamp(30px,5vw,46px);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;line-height:.98;margin:0 0 6px}
+h2{font-size:clamp(21px,3vw,29px);font-weight:900;text-transform:uppercase;letter-spacing:-.015em;line-height:1.05;
+  margin:46px 0 14px;padding-top:14px;border-top:var(--rule);scroll-margin-top:64px}
+h3{font-size:18.5px;font-weight:800;margin:32px 0 10px;scroll-margin-top:64px}
+p,li{max-width:70ch}
+p{margin:0 0 15px}
+ul,ol{padding-left:22px}
+li{margin-bottom:6px}
+a{color:var(--slonik);text-underline-offset:3px}
+a:focus-visible{outline:3px solid var(--plate);outline-offset:2px}
+strong{font-weight:800}
+hr{border:0;border-top:1.5px solid var(--mat-deep);margin:30px 0}
+code{font-family:"IBM Plex Mono",monospace;font-size:.86em;background:var(--slonik-lite);padding:1px 5px}
+pre{background:var(--ink);color:#E4EAF0;padding:15px 17px;overflow-x:auto;border:2px solid var(--ink);margin:0 0 17px}
+pre code{background:none;padding:0;font-size:13.4px;line-height:1.62;color:#E4EAF0}
+blockquote{margin:0 0 15px;padding-left:14px;border-left:4px solid var(--slonik);color:var(--ink-soft)}
+table{border-collapse:collapse;margin:0 0 20px;font-size:14.4px;width:100%}
+th{background:var(--ink);color:var(--chalk);text-align:left;padding:8px 12px;font-size:11px;
+  text-transform:uppercase;letter-spacing:.09em;font-weight:800}
+td{padding:8px 12px;border-bottom:1.5px solid var(--mat-deep);vertical-align:top}
+em{font-style:italic}
+@media(max-width:900px){.shell{grid-template-columns:1fr;gap:0}aside{display:none}
+  main{border-left:0;border-right:0;padding:24px 20px 60px}}
+</style></head><body>
+<header class="rail"><div class="rail-in">
+  <div class="mark">The Postgres <span>Gym</span> · Manual</div>
+  <a href="postgres-gym.html">&larr; Back to the practice floor</a>
+</div></header>
+<div class="shell">
+  <aside><div class="lab">Contents</div><a href="#contents">Contents</a>
+<a href="#1-how-to-use-this-manual">1. How to use this manual</a>
+<a href="#2-what-a-database-is-and-what-postgres-is">2. What a database is, and what Postgres is</a>
+<a href="#3-the-vocabulary-in-order">3. The vocabulary, in order</a>
+<a href="#4-warm-up-what-you-are-actually-training-on">4. Warm-up: what you are actually training on</a>
+<a href="#5-the-training-pathway--seven-sessions">5. The training pathway — seven sessions</a>
+<a href="#6-block-a--reading-rows">6. Block A — Reading rows</a>
+<a href="#7-block-b--combining-tables">7. Block B — Combining tables</a>
+<a href="#8-block-c--postgres-beyond-sql-92">8. Block C — Postgres beyond SQL-92</a>
+<a href="#9-block-d--operating-the-database">9. Block D — Operating the database</a>
+<a href="#10-the-full-programme-what-a-complete-floor-looks-like">10. The full programme: what a complete floor looks like</a>
+<a href="#11-codds-twelve-rules-tested">11. Codd&#x27;s twelve rules, tested</a>
+<a href="#12-the-machines-platform-training-briefs">12. The machines: platform training briefs</a>
+<a href="#13-spotters-giving-an-agent-database-access-without-regret">13. Spotters: giving an agent database access without regret</a>
+<a href="#14-maintenance-protocol-keeping-this-from-rotting">14. Maintenance protocol: keeping this from rotting</a>
+<a href="#appendix-a--quick-reference-card">Appendix A — Quick reference card</a>
+<a href="#appendix-b--glossary">Appendix B — Glossary</a></aside>
+  <main><h1>The Postgres Gym — Training Manual</h1>
+<p><strong>Companion to the practice floor · Edition 1 · Compiled 1 August 2026</strong></p>
+<hr />
+<h2 id="contents">Contents</h2>
+<p><strong>Part One — Foundations</strong>
+1. <a href="#1-how-to-use-this-manual">How to use this manual</a>
+2. <a href="#2-what-a-database-is-and-what-postgres-is">What a database is, and what Postgres is</a>
+3. <a href="#3-the-vocabulary-in-order">The vocabulary, in order</a>
+4. <a href="#4-warm-up-what-you-are-actually-training-on">Warm-up: what you are actually training on</a></p>
+<p><strong>Part Two — Training</strong></p>
+<ol start="5">
+<li><a href="#5-the-training-pathway--seven-sessions">The training pathway — seven sessions</a></li>
+<li><a href="#6-block-a--reading-rows">Block A — Reading rows</a></li>
+<li><a href="#7-block-b--combining-tables">Block B — Combining tables</a></li>
+<li><a href="#8-block-c--postgres-beyond-sql-92">Block C — Postgres beyond SQL-92</a></li>
+<li><a href="#9-block-d--operating-the-database">Block D — Operating the database</a></li>
+<li><a href="#10-the-full-programme-what-a-complete-floor-looks-like">The full programme</a></li>
+</ol>
+<p><strong>Part Three — Theory</strong></p>
+<ol start="11">
+<li><a href="#11-codds-twelve-rules-tested">Codd's twelve rules, tested</a></li>
+</ol>
+<p><strong>Part Four — The market</strong></p>
+<ol start="12">
+<li><a href="#12-the-machines-platform-training-briefs">The machines: platform training briefs</a></li>
+<li><a href="#13-spotters-giving-an-agent-database-access-without-regret">Spotters: which AI platform reaches which database</a></li>
+<li><a href="#14-maintenance-protocol-keeping-this-from-rotting">Maintenance protocol</a></li>
+<li><a href="#appendix-a--quick-reference-card">Appendix A — Quick reference card</a></li>
+<li><a href="#appendix-b--glossary">Appendix B — Glossary</a></li>
+</ol>
+<hr />
+<h2 id="1-how-to-use-this-manual">1. How to use this manual</h2>
+<p>Two kinds of knowledge live in a managed database product, and confusing them is expensive.</p>
+<p>One kind belongs to Postgres. Window functions, <code>NULL</code> semantics, index selection, row-level security, transaction isolation. Learn it once and it follows you from a laptop to Neon to Supabase to Aurora to a machine in a rack. Twenty years from now it will still be worth something.</p>
+<p>The other kind belongs to a company. Branch naming conventions, a proprietary dashboard, an SDK's idea of a migration, a billing unit invented last quarter. Useful while you stay, worthless the day you leave, and occasionally worthless before that because the vendor was acquired.</p>
+<p>Every drill on the practice floor carries a colour that tells you which sort of work you are doing. Blue leaves with you. Magenta stays behind. Each platform card carries a transfer rating estimating that split. Those ratings are editorial judgements about query-language portability and migration cost, arrived at by reading migration paths rather than marketing pages, and you should argue with them.</p>
+<p><strong>Suggested rhythm.</strong> Complete the eight floor drills in order before opening a single vendor account. Roughly ninety minutes if SQL is already familiar, a full afternoon if it is new. Only then pick one machine and work through its brief. Resist doing three at once; the platforms differ in ways that blur together when sampled in parallel.</p>
+<p><strong>What you need.</strong> A browser with WebAssembly, which means any browser released since about 2018. Nothing else. No install, no account, no connection string, and no data leaving the tab.</p>
+<hr />
+<h2 id="2-what-a-database-is-and-what-postgres-is">2. What a database is, and what Postgres is</h2>
+<p>A <strong>database</strong> is an organised collection of data, held so that questions can be asked of it. A <strong>database management system</strong>, or DBMS, is the program that holds it and answers the questions. Everyday speech collapses the two, and this manual does as well except where the difference matters.</p>
+<p><strong>Postgres</strong> — formally PostgreSQL, and "Postgres" everywhere except its own documentation — is a relational DBMS. Work began at Berkeley in 1986 under Michael Stonebraker as the successor to Ingres, hence the name. It has been open source since 1996, is owned by nobody, and is governed by a global development group. Nothing about it is new. Fourteen companies now sell it as a service precisely because it is old, free, and has stopped surprising people.</p>
+<p><strong>Relational</strong> means it implements Codd's model: data held as values in tables, questions expressed as operations on whole sets of rows, and no way to reach the data except through those operations. Section 11 tests Postgres against Codd's twelve rules one at a time and finds three of them wanting, which is the useful part.</p>
+<p><strong>SQL</strong> is the language you ask questions in. Pronounced either "sequel" or as three letters; nobody minds. Developed at IBM in the 1970s as an implementation of Codd's ideas, standardised since 1986, and diverging from his model in several places he objected to publicly. Every product in this field speaks it, which is why learning it transfers.</p>
+<hr />
+<h2 id="3-the-vocabulary-in-order">3. The vocabulary, in order</h2>
+<p>Twelve units. Each introduces its terms, shows a worked example you can run on the practice floor, then asks you to write one variation. Answers follow each exercise, so read straight through if you prefer.</p>
+<p>Where a SQL term corresponds to something in the relational model, the correspondence is given, along with any divergence. Those divergences are not incidental — they are where most confusion in practice comes from.</p>
+<hr />
+<h3 id="31-table-row-column">3.1 Table, row, column</h3>
+<p>A <strong>table</strong> holds one kind of thing. This database has two: <code>vendors</code>, holding companies that sell databases, and <code>rounds</code>, holding funding events.</p>
+<p>A <strong>row</strong> is one of those things — one company, one funding event. A <strong>column</strong> is one fact recorded about every thing in the table: its name, its owner, the amount raised.</p>
+<p>Relational correspondence: table is SQL's word for a <strong>relation</strong>, row for a <strong>tuple</strong>, column for an <strong>attribute</strong>. One divergence matters. A relation is a set, so it cannot contain duplicates; a SQL table permits them, making it a bag. Codd treated this as a defect, and rule 2 in section 11 demonstrates it.</p>
+<p><strong>Example.</strong> The asterisk means every column.</p>
+<pre><code class="language-sql">select * from vendors;
+</code></pre>
+<p>Fourteen rows come back, one per company, with every column shown.</p>
+<p><strong>Exercise.</strong> Show everything in the other table, <code>rounds</code>.</p>
+<pre><code class="language-sql">select * from rounds;      -- seven rows
+</code></pre>
+<hr />
+<h3 id="32-query-statement-clause-keyword">3.2 Query, statement, clause, keyword</h3>
+<p>A <strong>query</strong> is a question put to the database. A <strong>statement</strong> is one complete instruction, ended by a semicolon; a query is one kind of statement, and there are others that change data rather than read it.</p>
+<p>A statement is built from <strong>clauses</strong>, each beginning with a <strong>keyword</strong>. In <code>select * from vendors</code>, the select clause says which columns, the from clause says which table. Keywords are conventionally written in capitals in textbooks; this manual writes them lower case, and Postgres accepts either.</p>
+<p>A <strong>result set</strong> is what comes back: rows and columns, itself shaped like a table. That closure — questions about tables returning tables — is what allows queries to be built out of other queries.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select name from vendors;
+</code></pre>
+<p><strong>Exercise.</strong> Write a statement returning only the <code>engine</code> column from <code>vendors</code>.</p>
+<pre><code class="language-sql">select engine from vendors;
+</code></pre>
+<hr />
+<h3 id="33-projection-choosing-columns">3.3 Projection: choosing columns</h3>
+<p><strong>Projection</strong> is the relational operation that keeps some attributes and discards the rest. SQL spells it as the list of columns after <code>select</code>, separated by commas. Column names take no quotation marks.</p>
+<p>Order is yours to choose and need not match how the table was defined.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select name, owner from vendors;
+</code></pre>
+<p><strong>Exercise.</strong> Return the name and the billing unit of every vendor, billing unit first.</p>
+<pre><code class="language-sql">select billing_unit, name from vendors;
+</code></pre>
+<hr />
+<h3 id="34-data-types-and-domains">3.4 Data types and domains</h3>
+<p>Every column has a <strong>data type</strong>, fixing what may be stored in it. <code>text</code> for words, <code>integer</code> and <code>numeric</code> for numbers, <code>boolean</code> for true and false, <code>date</code> for dates, <code>jsonb</code> for structured documents. Postgres refuses anything that does not fit, at write time.</p>
+<p>Relational correspondence: Codd's <strong>domain</strong> is the pool of permissible values for an attribute. Data types implement part of that idea. Codd wanted domains to be user-definable and semantically meaningful — a "price" domain distinct from an "age" domain even though both are numbers — so that comparing them would be rejected. SQL's types are cruder, though Postgres offers <code>create domain</code> and custom types for those who want the stricter version.</p>
+<p>Practical consequence: <strong>text values are written in single quotes, column names are written bare</strong>. <code>where owner = 'Amazon'</code> compares the owner column against the text Amazon. Reverse the quotes and Postgres will report that no column named Amazon exists, which is the single most common beginner error and always means this.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select name, funding_usd_m from vendors where owner = 'Amazon';
+</code></pre>
+<p><strong>Exercise.</strong> Return the name and engine of vendors whose engine is <code>sqlite</code>.</p>
+<pre><code class="language-sql">select name, engine from vendors where engine = 'sqlite';
+</code></pre>
+<hr />
+<h3 id="35-restriction-choosing-rows">3.5 Restriction: choosing rows</h3>
+<p><strong>Restriction</strong> — Codd's term; most textbooks say <strong>selection</strong>, confusingly, since SQL's <code>select</code> does projection — keeps rows satisfying a condition and discards the rest. SQL spells it <code>where</code>.</p>
+<p>A <strong>predicate</strong> is the condition itself: an expression evaluating to true, false, or unknown. <strong>Operators</strong> available include <code>=</code>, <code>&lt;&gt;</code> for not-equal, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, and <code>like</code> for text patterns. Predicates combine with <code>and</code>, <code>or</code>, <code>not</code>.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select name, funding_usd_m
+from vendors
+where funding_usd_m &gt; 50 and engine = 'postgres';
+</code></pre>
+<p><strong>Exercise.</strong> Return vendors that are wire compatible and independently owned. The relevant columns are <code>wire_compatible</code>, a boolean, and <code>owner</code>.</p>
+<pre><code class="language-sql">select name from vendors where wire_compatible and owner = 'independent';
+</code></pre>
+<p>Note the boolean needs no comparison. <code>where wire_compatible</code> reads as the condition it already is; <code>= true</code> is legal and redundant.</p>
+<hr />
+<h3 id="36-null-and-why-it-is-contested">3.6 NULL, and why it is contested</h3>
+<p>Some cells hold <strong>NULL</strong>, meaning the value is unknown. Distinct from zero, distinct from an empty string, and available for every data type.</p>
+<p>Relational correspondence: none, in the original model. Codd added missing information later and argued in 1986 for <strong>two</strong> marks — missing-but-applicable and missing-and-inapplicable — because "we have not been told this company's funding" and "this company cannot have funding" are different facts. SQL provides one mark for both. Rule 3 in section 11 records this as the failure it is.</p>
+<p>Three consequences you must absorb now, because they cause silent wrong answers rather than errors:</p>
+<ol>
+<li><strong>Comparison never works.</strong> <code>= null</code> yields unknown, never true, so it matches nothing. Ask <code>is null</code> or <code>is not null</code>.</li>
+<li><strong>Sorting puts NULL last ascending and first descending.</strong> A "top three by funding" query without care returns three blanks.</li>
+<li><strong>Aggregates skip it.</strong> <code>count(*)</code> counts rows; <code>count(column)</code> counts non-null values in that column. The gap between those two numbers tells you how much you do not know.</li>
+</ol>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select (null = null) as &quot;null = null&quot;,
+       (null is null) as &quot;null is null&quot;;
+</code></pre>
+<p>The first returns NULL, the second true.</p>
+<p><strong>Exercise.</strong> Return the names of vendors with no recorded funding figure.</p>
+<pre><code class="language-sql">select name from vendors where funding_usd_m is null;      -- seven rows
+</code></pre>
+<hr />
+<h3 id="37-ordering-and-limiting">3.7 Ordering and limiting</h3>
+<p><code>order by</code> sorts the result. Ascending by default, <code>desc</code> for the reverse, and <code>nulls first</code> or <code>nulls last</code> to override where the unknowns land. <code>limit</code> caps how many rows come back.</p>
+<p>Relational correspondence: none, deliberately. A relation is a set and sets are unordered, so ordering belongs to presentation rather than to the data. Nothing about the stored table changes. This also means <code>limit</code> without <code>order by</code> returns arbitrary rows, and can return different rows on the next run.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select name, funding_usd_m
+from vendors
+where funding_usd_m is not null
+order by funding_usd_m desc
+limit 3;
+</code></pre>
+<p><strong>Exercise.</strong> List every vendor alphabetically by owner, then by name within each owner.</p>
+<pre><code class="language-sql">select owner, name from vendors order by owner, name;
+</code></pre>
+<hr />
+<h3 id="38-aliases">3.8 Aliases</h3>
+<p><code>as</code> renames a column in the result. Useful when a column carries a computed value with no natural name, or when the underlying name is unhelpful. Table aliases work the same way and save typing in joins: <code>from vendors v</code> lets you write <code>v.name</code>.</p>
+<p>Quote an alias in double quotes when it contains spaces. Note the asymmetry: single quotes mean a text value, double quotes mean an identifier.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select name as company, funding_usd_m as &quot;millions raised&quot;
+from vendors
+where funding_usd_m is not null;
+</code></pre>
+<p><strong>Exercise.</strong> Return each vendor's name aliased as <code>firm</code>, and its billing unit aliased as <code>charged by</code>.</p>
+<pre><code class="language-sql">select name as firm, billing_unit as &quot;charged by&quot; from vendors;
+</code></pre>
+<hr />
+<h3 id="39-keys">3.9 Keys</h3>
+<p>A <strong>primary key</strong> is a column, or set of columns, whose value identifies a row uniquely. <code>vendors.id</code> is one. Postgres enforces it: no duplicates, no nulls.</p>
+<p>A <strong>foreign key</strong> is a column holding a primary key value from another table, recording a relationship. <code>rounds.vendor_id</code> holds <code>vendors.id</code> values, so each funding round points at the company that raised it. Postgres enforces this too, refusing rounds that reference a company that does not exist.</p>
+<p>Relational correspondence: direct, and this is Codd's rule 2. Give the table, the primary key value, and the column, and any single datum in the database is reachable. Where a table has no primary key the guarantee lapses, which is why duplicate rows are a real problem rather than an aesthetic one.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select id, name from vendors where id = 1;
+</code></pre>
+<p><strong>Exercise.</strong> Return every row from <code>rounds</code> belonging to vendor 2.</p>
+<pre><code class="language-sql">select * from rounds where vendor_id = 2;      -- two rows
+</code></pre>
+<hr />
+<h3 id="310-joins">3.10 Joins</h3>
+<p>A <strong>join</strong> combines rows from two tables by matching values, normally a foreign key against a primary key. Written as <code>join ... on &lt;condition&gt;</code>.</p>
+<p>An <strong>inner join</strong>, the default, keeps only rows that match on both sides. A <strong>left join</strong> keeps every row from the left table, filling with NULL where the right side has nothing — which is how you find the absences.</p>
+<p>Relational correspondence: Codd's join, and it is the operation that makes the model work. Splitting data across tables and rejoining on demand avoids storing the same fact twice, which is what <strong>normalisation</strong> means and why it prevents a fact being updated in one place and left stale in another.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select v.name, r.stage, r.amount_usd_m
+from rounds r
+join vendors v on v.id = r.vendor_id;
+</code></pre>
+<p><strong>Exercise.</strong> List every vendor together with its round count, including vendors that have raised nothing recorded.</p>
+<pre><code class="language-sql">select v.name, count(r.id) as rounds
+from vendors v
+left join rounds r on r.vendor_id = v.id
+group by v.name
+order by rounds desc, v.name;
+</code></pre>
+<p>Note <code>count(r.id)</code> rather than <code>count(*)</code>: after a left join, <code>count(*)</code> counts the padded row and reports 1 where the truth is 0.</p>
+<hr />
+<h3 id="311-aggregates-and-grouping">3.11 Aggregates and grouping</h3>
+<p>An <strong>aggregate function</strong> collapses many rows into one value: <code>count</code>, <code>sum</code>, <code>avg</code>, <code>min</code>, <code>max</code>. Without grouping it collapses the whole table to a single row.</p>
+<p><code>group by</code> splits rows into groups first and applies the aggregate to each, returning one row per group. <code>having</code> then filters the groups, and <code>where</code> cannot do that job because it runs before grouping exists.</p>
+<p>Clause execution order, which differs from writing order and explains most confusing errors:</p>
+<pre><code>from → where → group by → having → select → order by → limit
+</code></pre>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select engine, count(*) as vendors, sum(funding_usd_m) as disclosed
+from vendors
+group by engine
+order by vendors desc;
+</code></pre>
+<p><strong>Exercise.</strong> Count how many vendors each owner has, keeping only owners with more than one.</p>
+<pre><code class="language-sql">select owner, count(*) as n
+from vendors
+group by owner
+having count(*) &gt; 1;
+</code></pre>
+<hr />
+<h3 id="312-views-indexes-constraints-transactions">3.12 Views, indexes, constraints, transactions</h3>
+<p>Four terms you will meet constantly and need not use yet.</p>
+<p>A <strong>view</strong> is a stored query given a name, queried as though it were a table. Codd's derived relation. Views let the underlying tables be restructured while queries carry on working, which is rule 9.</p>
+<p>An <strong>index</strong> is a data structure making lookups faster. It has <strong>no logical meaning whatsoever</strong>: adding or dropping one never changes any answer, only the time taken. That invariance is Codd's rule 8, and it is why an index is a maintenance decision rather than a modelling one.</p>
+<p>A <strong>constraint</strong> is a rule the database enforces on every write — a check, a uniqueness requirement, a foreign key. Declared once, applied to every writer forever, including writers not yet written. Codd's rule 10 requires constraints to live in the catalog rather than in application code, and the reason is exactly that: validation in an application protects only the paths someone remembered.</p>
+<p>A <strong>transaction</strong> is a group of statements that succeed or fail together. <code>begin</code>, then your statements, then <code>commit</code> to keep them or <code>rollback</code> to discard. Nobody else sees a partial state.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">create view portable as
+  select name, engine from vendors where wire_compatible;
+select count(*) from portable;
+</code></pre>
+<p><strong>Exercise.</strong> Create a view named <code>funded</code> showing name and funding for vendors with a disclosed figure, then count its rows.</p>
+<pre><code class="language-sql">create view funded as
+  select name, funding_usd_m from vendors where funding_usd_m is not null;
+select count(*) from funded;      -- seven
+</code></pre>
+<hr />
+<h3 id="313-ddl-dml-and-the-catalog">3.13 DDL, DML, and the catalog</h3>
+<p>Statements divide into two families. <strong>DDL</strong>, data definition language, changes the shape of the database: <code>create table</code>, <code>alter table</code>, <code>drop</code>, <code>create index</code>, <code>create view</code>. <strong>DML</strong>, data manipulation language, changes or reads the contents: <code>select</code>, <code>insert</code>, <code>update</code>, <code>delete</code>.</p>
+<p>The <strong>catalog</strong> is where Postgres records the shape of everything — tables, columns, types, constraints, indexes, views. It is itself made of tables, queryable with ordinary SQL. Codd's rule 4, and the most satisfying of the twelve: the database describes itself in its own language, with no separate metadata dialect and no privileged inspection tool.</p>
+<p><strong>Example.</strong></p>
+<pre><code class="language-sql">select table_name, column_name, data_type
+from information_schema.columns
+where table_schema = 'public'
+order by table_name, ordinal_position;
+</code></pre>
+<p><strong>Exercise.</strong> List the names of every table in the public schema, using the catalog.</p>
+<pre><code class="language-sql">select tablename from pg_tables where schemaname = 'public';
+</code></pre>
+<hr />
+<p>That is the whole vocabulary the rest of this manual uses. Section 5 gives you a route through it; sections 6 to 9 drill each idea until it holds.</p>
+<hr />
+<h2 id="4-warm-up-what-you-are-actually-training-on">4. Warm-up: what you are actually training on</h2>
+<h3 id="41-postgres-in-a-browser-tab">4.1 Postgres in a browser tab</h3>
+<p>Practice floor drills run against PGlite, a build of Postgres 17 compiled to WebAssembly by ElectricSQL, weighing under 3MB gzipped. Earlier attempts at browser Postgres booted a Linux virtual machine and then ran the server inside it. PGlite drops that layer and compiles the database directly, which is why it starts in well under a second.</p>
+<p>Real planner, real type system, real aggregate functions, and dynamic extension loading that includes pgvector and PostGIS. Queries you write here behave as they would against a managed instance, with three caveats worth internalising early:</p>
+<ul>
+<li><strong>Single connection.</strong> Postgres normally forks a process per client. Emscripten cannot fork, so PGlite runs single-process. Concurrency behaviour therefore cannot be exercised here, and drills involving locking or isolation belong on a real server.</li>
+<li><strong>Single JavaScript thread.</strong> A heavy query blocks the page. Production embeddings of PGlite move it into a Web Worker.</li>
+<li><strong>Superuser everywhere.</strong> You connect as <code>postgres</code>, who bypasses row-level security. Drill 8 teaches you to write a policy; verifying that a policy actually blocks someone requires a second role on a real server.</li>
+</ul>
+<h3 id="42-why-wire-compatibility-organises-the-entire-market">4.2 Why wire compatibility organises the entire market</h3>
+<p>Postgres speaks a documented protocol over TCP. Any product that implements that protocol can be addressed by every existing Postgres client, driver, ORM, dashboard, backup tool and migration framework, without any of them being modified.</p>
+<p>Consequences follow directly. A vendor claiming Postgres compatibility inherits three decades of surrounding software for free. A customer choosing that vendor keeps a credible exit, because a competitor speaking the same protocol accepts a <code>pg_dump</code> without translation. Competition therefore concentrates on operational qualities — provisioning speed, idle cost, branching, region topology — rather than on query language.</p>
+<p>Which is exactly why the products that reject the protocol deserve close reading. DynamoDB and Convex both give up portability deliberately and in exchange offer something the compatible field cannot. Judge that trade honestly in both directions.</p>
+<h3 id="43-the-seed-data">4.3 The seed data</h3>
+<p>Both tables describe the managed database market itself, as reported on 27 July 2026.</p>
+<pre><code>vendors (id, name, owner, engine, wire_compatible, billing_unit,
+         funding_usd_m, valuation_usd_m, meta jsonb)   -- 14 rows
+rounds  (id, vendor_id, stage, amount_usd_m, lead_investor, closed_year)  -- 7 rows
+</code></pre>
+<p>Only figures stated in the source reporting appear. Everything undisclosed is <code>NULL</code>. That decision makes the dataset harder and considerably more honest, because most of the difficulty in production SQL comes from absent values rather than from clever joins. Several drills exist purely to make you handle them.</p>
+<hr />
+<h2 id="5-the-training-pathway--seven-sessions">5. The training pathway — seven sessions</h2>
+<p>Sections 6 to 9 are reference material, organised by topic. This section is the route through them, organised by time. Follow it in order.</p>
+<p>Every drill link below opens the practice floor at that exercise. Extension exercises carry no automatic checking, so run them in the scratch console at the top of the page and compare against the answers given here. Self-checks are questions to answer aloud before moving on; if one stalls you, the coaching notes in the relevant block will unstick it.</p>
+<p><strong>Total time: about five hours across seven sessions.</strong> Spread over a week beats a single sitting, because the material rewards sleeping on it.</p>
+<table>
+<thead>
+<tr>
+<th>Session</th>
+<th>Focus</th>
+<th>Time</th>
+<th>Drills</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Orientation</td>
+<td>15 min</td>
+<td>—</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Reading rows</td>
+<td>35 min</td>
+<td><a href="postgres-gym.html#d0">1</a>, <a href="postgres-gym.html#d1">2</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Combining tables</td>
+<td>45 min</td>
+<td><a href="postgres-gym.html#d2">3</a>, <a href="postgres-gym.html#d3">4</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Beyond SQL-92</td>
+<td>55 min</td>
+<td><a href="postgres-gym.html#d4">5</a>, <a href="postgres-gym.html#d5">6</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Operating</td>
+<td>50 min</td>
+<td><a href="postgres-gym.html#d6">7</a>, <a href="postgres-gym.html#d7">8</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Unassisted assessment</td>
+<td>60 min</td>
+<td>—</td>
+</tr>
+<tr>
+<td>6</td>
+<td>First machine</td>
+<td>90 min</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="session-0--orientation--15-minutes">Session 0 · Orientation — 15 minutes</h3>
+<p><strong>Do this.</strong> Open the <a href="postgres-gym.html">practice floor</a>. Wait for the status line to read <em>Postgres ready</em>. Run the query already in the console, then press <strong>Show schema</strong> and read both table definitions properly, including which columns permit nulls.</p>
+<p>Now run one query of your own invention. Anything. Getting a syntax error and fixing it inside the first five minutes sets the right expectation for everything that follows.</p>
+<p><strong>Read.</strong> Sections 1 and 2 of this manual, about ten minutes.</p>
+<p><strong>Self-check.</strong> Why does a browser tab containing a full Postgres engine matter for learning? Why can this engine never teach you about lock contention?</p>
+<hr />
+<h3 id="session-1--reading-rows--35-minutes">Session 1 · Reading rows — 35 minutes</h3>
+<p><strong>Objective.</strong> Filter and order rows, and stop being surprised by <code>NULL</code>.</p>
+<p><strong>Drills.</strong> <a href="postgres-gym.html#d0">Drill 1 — Filter on a boolean</a> · <a href="postgres-gym.html#d1">Drill 2 — Sort, then cut</a></p>
+<p>Attempt each before reading its coaching note in <a href="#6-block-a--reading-rows">section 4</a>. Getting drill 2 wrong the first time is the intended experience; the reason it fails is the entire lesson.</p>
+<p><strong>Extension exercises</strong> (scratch console, no checker):</p>
+<p><strong>1a.</strong> Count vendors by owner, most first.</p>
+<pre><code class="language-sql">select owner, count(*) as n from vendors group by owner order by n desc;
+</code></pre>
+<p><strong>1b.</strong> List vendors whose billing unit mentions a request or an operation.</p>
+<pre><code class="language-sql">select name, billing_unit from vendors
+where billing_unit ilike any (array['%request%','%operation%']);
+</code></pre>
+<p><code>ilike</code> is case-insensitive matching; <code>any</code> over an array saves a chain of <code>or</code>.</p>
+<p><strong>1c.</strong> Every vendor with its funding shown as a readable string, using <code>0</code> where undisclosed. Then do it again preserving the distinction between zero and unknown.</p>
+<pre><code class="language-sql">select name, coalesce(funding_usd_m, 0) as funding from vendors;
+select name, coalesce(funding_usd_m::text, 'undisclosed') as funding from vendors;
+</code></pre>
+<p>Second version is almost always the right one. Substituting <code>0</code> for "we do not know" invents a fact, and downstream nobody can tell which zeros were real.</p>
+<p><strong>1d.</strong> Vendors whose valuation is unknown, written two ways. Explain why only one works.</p>
+<pre><code class="language-sql">select name from vendors where valuation_usd_m is null;   -- correct
+select name from vendors where valuation_usd_m = null;    -- returns nothing, ever
+</code></pre>
+<p><strong>Self-check.</strong> What does <code>count(valuation_usd_m)</code> return, and why does it differ from <code>count(*)</code>? If <code>wire_compatible</code> allowed nulls, would <code>where wire_compatible</code> and <code>where not wire_compatible</code> together cover every row?</p>
+<hr />
+<h3 id="session-2--combining-tables--45-minutes">Session 2 · Combining tables — 45 minutes</h3>
+<p><strong>Objective.</strong> Join with intent, aggregate with the execution order in mind.</p>
+<p><strong>Drills.</strong> <a href="postgres-gym.html#d2">Drill 3 — Join across the foreign key</a> · <a href="postgres-gym.html#d3">Drill 4 — Aggregate, then filter the groups</a></p>
+<p><strong>Extension exercises:</strong></p>
+<p><strong>2a.</strong> Every vendor together with its round count, including vendors that have raised nothing recorded.</p>
+<pre><code class="language-sql">select v.name, count(r.id) as rounds
+from vendors v left join rounds r on r.vendor_id = v.id
+group by v.name order by rounds desc, v.name;
+</code></pre>
+<p>Note <code>count(r.id)</code> rather than <code>count(*)</code>. After a left join, <code>count(*)</code> counts the padded row and reports 1 where the truth is 0.</p>
+<p><strong>2b.</strong> Vendors with no recorded round, written three ways.</p>
+<pre><code class="language-sql">select v.name from vendors v left join rounds r on r.vendor_id=v.id where r.id is null;
+select name from vendors v where not exists (select 1 from rounds r where r.vendor_id=v.id);
+select name from vendors where id not in (select vendor_id from rounds);
+</code></pre>
+<p>All three agree here. Insert a row into <code>rounds</code> with <code>vendor_id</code> set to <code>null</code> and run them again: the third silently returns nothing. <code>not in</code> against a set containing a null yields unknown for every row. This trap has taken down production reports; meeting it in a scratch database is much cheaper.</p>
+<p><strong>2c.</strong> Lead investors appearing in more than one round.</p>
+<pre><code class="language-sql">select lead_investor, count(*) from rounds
+where lead_investor is not null
+group by lead_investor having count(*) &gt; 1;
+</code></pre>
+<p><strong>2d.</strong> For each engine type, how many vendors disclosed funding and how many did not, in a single row per engine.</p>
+<pre><code class="language-sql">select engine,
+       count(*) filter (where funding_usd_m is not null) as disclosed,
+       count(*) filter (where funding_usd_m is null)     as undisclosed
+from vendors group by engine order by engine;
+</code></pre>
+<p><code>filter</code> is cleaner than <code>sum(case when ... then 1 else 0 end)</code> and reads as what it does.</p>
+<p><strong>Self-check.</strong> Why does <code>where</code> fail when you reference <code>count(*)</code>? Which of your three anti-join spellings would you put in production code, and why?</p>
+<hr />
+<h3 id="session-3--beyond-sql-92--55-minutes">Session 3 · Beyond SQL-92 — 55 minutes</h3>
+<p><strong>Objective.</strong> Window functions and JSONB, the two features that most often replace application code with a query.</p>
+<p><strong>Drills.</strong> <a href="postgres-gym.html#d4">Drill 5 — Rank inside a partition</a> · <a href="postgres-gym.html#d5">Drill 6 — Reach into JSONB</a></p>
+<p>Longest session on the floor. Both features have a syntax hurdle in front of a simple idea.</p>
+<p><strong>Extension exercises:</strong></p>
+<p><strong>3a.</strong> Each funded vendor with its funding, plus that engine's total, on the same row.</p>
+<pre><code class="language-sql">select name, engine, funding_usd_m,
+       sum(funding_usd_m) over (partition by engine) as engine_total
+from vendors where funding_usd_m is not null order by engine, funding_usd_m desc;
+</code></pre>
+<p>Compare against <code>group by</code>. Aggregation collapses rows; a window keeps them and attaches the aggregate alongside. Recognising which one a question wants is the skill.</p>
+<p><strong>3b.</strong> Each vendor's share of its engine's disclosed funding, as a percentage.</p>
+<pre><code class="language-sql">select name, engine,
+       round(100 * funding_usd_m / sum(funding_usd_m) over (partition by engine), 1) as pct
+from vendors where funding_usd_m is not null order by engine, pct desc;
+</code></pre>
+<p><strong>3c.</strong> Rounds in chronological order with a running total, and the gap to the previous round.</p>
+<pre><code class="language-sql">select stage, closed_year, amount_usd_m,
+       sum(amount_usd_m) over (order by closed_year nulls first) as running,
+       closed_year - lag(closed_year) over (order by closed_year nulls first) as gap
+from rounds where amount_usd_m is not null;
+</code></pre>
+<p><strong>3d.</strong> Every distinct key present across all <code>meta</code> documents, with how many vendors carry it.</p>
+<pre><code class="language-sql">select k, count(*) from vendors, lateral jsonb_object_keys(meta) as k
+group by k order by count(*) desc;
+</code></pre>
+<p><code>lateral</code> lets a set-returning function see each row's own column. Note which keys appear in three or four rows; those are the candidates to promote into real columns.</p>
+<p><strong>3e.</strong> Every vendor supporting scale-to-zero, using containment, then using extraction, and explain which you would index.</p>
+<pre><code class="language-sql">select name from vendors where meta @&gt; '{&quot;scale_to_zero&quot;:true}';
+select name from vendors where meta -&gt;&gt; 'scale_to_zero' = 'true';
+</code></pre>
+<p><strong>Self-check.</strong> Why does <code>where rn = 1</code> fail without a CTE? What would <code>rank()</code> change about drill 5's answer if two vendors in one engine had identical funding?</p>
+<hr />
+<h3 id="session-4--operating--50-minutes">Session 4 · Operating — 50 minutes</h3>
+<p><strong>Objective.</strong> Stop treating the database as a black box.</p>
+<p><strong>Drills.</strong> <a href="postgres-gym.html#d6">Drill 7 — Create an index and read the plan</a> · <a href="postgres-gym.html#d7">Drill 8 — Write a row-level security policy</a></p>
+<p><strong>Extension exercises:</strong></p>
+<p><strong>4a.</strong> Watch the planner refuse your index, then make it change its mind.</p>
+<pre><code class="language-sql">explain analyze select * from vendors where engine = 'postgres';
+create table big as select (random()*1000)::int as g, md5(random()::text) as payload
+  from generate_series(1, 200000);
+analyze big;
+explain analyze select * from big where g = 500;   -- Seq Scan
+create index idx_big_g on big (g);
+analyze big;
+explain analyze select * from big where g = 500;   -- Bitmap Heap Scan
+</code></pre>
+<p>Same query, same index, different decision, driven entirely by table size and selectivity. Measured in this engine: roughly 23ms falling to under 1ms across 200,000 rows, for about 180 matches.</p>
+<p>Expect a Bitmap Heap Scan rather than a plain Index Scan. Postgres collects matching locations first and then visits the heap in physical order, which beats jumping around when a query returns hundreds of scattered rows. Both count as using the index; reading which node appeared and asking why is the habit to build.</p>
+<p><strong>4b.</strong> A partial index, and confirming it gets used.</p>
+<pre><code class="language-sql">create index idx_big_low on big (payload) where g &lt; 10;
+explain analyze select payload from big where g &lt; 10 order by payload limit 5;
+</code></pre>
+<p>Partial indexes cost a fraction of a full one when queries reliably carry the same predicate.</p>
+<p><strong>4c.</strong> Find indexes nobody uses.</p>
+<pre><code class="language-sql">select relname, indexrelname, idx_scan from pg_stat_user_indexes order by idx_scan;
+</code></pre>
+<p>Run this against any real system you own. Every unused index taxes writes and, on consumption billing, appears on an invoice.</p>
+<p><strong>4d.</strong> Write a tenant policy properly, with both clauses.</p>
+<pre><code class="language-sql">create table docs (id serial primary key, tenant text not null, body text);
+alter table docs enable row level security;
+create policy tenant_rw on docs for all
+  using      (tenant = current_setting('app.tenant', true))
+  with check (tenant = current_setting('app.tenant', true));
+select * from pg_policies where tablename = 'docs';
+</code></pre>
+<p>Drop the <code>with check</code> clause and describe precisely what an attacker could then do. Answer: read nothing outside their tenant, and write rows into anyone's.</p>
+<p><strong>Self-check.</strong> Why did the planner ignore <code>idx_vendors_engine</code>? Whom does <code>enable row level security</code> fail to constrain, and what additional statement fixes that?</p>
+<hr />
+<h3 id="session-5--unassisted-assessment--60-minutes">Session 5 · Unassisted assessment — 60 minutes</h3>
+<p>No links, no coaching notes, no reference answers in this manual. Work in the scratch console, closed-book, and verify your own results by reasoning about them rather than by checking against something.</p>
+<ol>
+<li>Which engine types have every one of their vendors wire-compatible? Return the engine and the vendor count.</li>
+<li>Rank funded vendors by funding within their ownership category (Amazon, Databricks, independent, other), showing ties as equal ranks with no gap afterwards.</li>
+<li>Total disclosed round money per vendor, listing every vendor including those with none, showing 0 rather than null for the empty ones, ordered largest first.</li>
+<li>Every vendor whose <code>meta</code> carries three or more keys, with the key count.</li>
+<li>Add a <code>region text[]</code> column to <code>vendors</code>, populate three rows, then return vendors available in a region you choose. Which index type suits an array containment query?</li>
+<li>Create a table with a check constraint that makes an invalid state impossible to store, then prove it by attempting an invalid insert. Explain why a constraint beats validation in application code.</li>
+<li>Write a query whose result is correct today and would silently become wrong if a new vendor were added with a null <code>engine</code>. Then repair it.</li>
+</ol>
+<p>Question 7 is the one that matters. Producing correct SQL is ordinary competence; anticipating how your SQL will fail as the data changes is the thing worth certifying.</p>
+<p><strong>Standard.</strong> Five of seven, unaided, is a genuine pass. Question 7 answered well is worth more than the other six together.</p>
+<hr />
+<h3 id="session-6--first-machine--90-minutes">Session 6 · First machine — 90 minutes</h3>
+<p>Only now open a vendor account, and open exactly one.</p>
+<p><strong>Choosing.</strong> Building something with realtime updates or multi-user auth, pick <a href="postgres-gym.html#m-supabase">Supabase</a> and spend the session on RLS, which you have already half-learned. Working in a team with pull requests and preview deployments, pick <a href="postgres-gym.html#m-neon">Neon</a> and spend it on branching. Sitting inside a corporate procurement process, pick <a href="postgres-gym.html#m-aurora-postgresql">Aurora</a> and spend it on IAM and VPC, because that is what the work will actually be.</p>
+<p>Follow the training session in <a href="#12-the-machines-platform-training-briefs">section 9</a> for whichever you chose.</p>
+<p><strong>Afterwards, write down three things</strong> before the impressions fade: what the platform made easy that was hard before; what it made hard that was easy before; and what you would have to rebuild if you left. Third answer is your own transfer rating, and it will be better calibrated than the estimate on the card because you will have earned it.</p>
+<hr />
+<h2 id="6-block-a--reading-rows">6. Block A — Reading rows</h2>
+<h3 id="drill-1--filter-on-a-boolean">Drill 1 · Filter on a boolean</h3>
+<p><strong>Brief.</strong> Name and engine of every vendor speaking the Postgres wire protocol.</p>
+<pre><code class="language-sql">select name, engine
+from vendors
+where wire_compatible;
+</code></pre>
+<p><strong>Returns 8 rows.</strong></p>
+<p><strong>Coaching.</strong> A boolean column needs no comparison. <code>where wire_compatible = true</code> works and marks you as someone who learned SQL through another language's habits. Postgres accepts the bare predicate because a boolean expression is already a condition.</p>
+<p>Watch the third state. <code>where not wire_compatible</code> returns rows that are explicitly false, and silently drops any row where the column is <code>NULL</code>. Here the column is <code>not null</code>, so nothing hides. On a table without that constraint, the two clauses would not partition the table between them, and the missing rows would go unnoticed for months.</p>
+<hr />
+<h3 id="drill-2--sort-then-cut">Drill 2 · Sort, then cut</h3>
+<p><strong>Brief.</strong> Three vendors with the largest disclosed funding, name and figure, largest first.</p>
+<pre><code class="language-sql">select name, funding_usd_m
+from vendors
+where funding_usd_m is not null
+order by funding_usd_m desc
+limit 3;
+</code></pre>
+<p><strong>Returns:</strong> Redis 357, Neon 129.6, MotherDuck 100.</p>
+<p><strong>Coaching.</strong> Omitting the <code>where</code> clause is the whole point of this drill. Postgres sorts <code>NULL</code> as larger than any value, so under <code>desc</code> every undisclosed vendor floats to the top and your top three becomes three empty rows. Two remedies exist:</p>
+<pre><code class="language-sql">order by funding_usd_m desc nulls last   -- keep the rows, push them down
+where funding_usd_m is not null          -- exclude them entirely
+</code></pre>
+<p>Choose according to meaning. "Best funded" excludes the unknown. "All vendors, best funded first" keeps them and demotes them. Deciding which question you are answering is the actual skill; the syntax takes a minute.</p>
+<p>Also note that <code>limit</code> without <code>order by</code> is non-deterministic. Postgres will happily return three arbitrary rows, and will return a different three after a vacuum.</p>
+<hr />
+<h2 id="7-block-b--combining-tables">7. Block B — Combining tables</h2>
+<h3 id="drill-3--join-across-the-foreign-key">Drill 3 · Join across the foreign key</h3>
+<p><strong>Brief.</strong> Every funding round with the vendor it belongs to: vendor name, stage, amount, lead investor.</p>
+<pre><code class="language-sql">select v.name, r.stage, r.amount_usd_m, r.lead_investor
+from rounds r
+join vendors v on v.id = r.vendor_id;
+</code></pre>
+<p><strong>Returns 7 rows.</strong></p>
+<p><strong>Coaching.</strong> Driving from <code>rounds</code> rather than from <code>vendors</code> reflects the question. You want rounds, annotated with vendor names, so rounds is the left-hand table and <code>join</code> (inner by default) keeps exactly the rounds that resolve.</p>
+<p>Try <code>from vendors v left join rounds r on r.vendor_id = v.id</code> and observe fourteen rows instead of seven, most padded with nulls. Neither is wrong; they answer different questions. Choosing a join type is choosing which side is allowed to be absent.</p>
+<p>One row in the output has <code>NULL</code> in both amount and lead investor: a Series E that the source reporting confirms happened without disclosing terms. Presence and value are separate facts, and a database that conflates them will lie to you.</p>
+<hr />
+<h3 id="drill-4--aggregate-then-filter-the-groups">Drill 4 · Aggregate, then filter the groups</h3>
+<p><strong>Brief.</strong> Total disclosed funding by engine type, keeping only engine types with at least two disclosing vendors.</p>
+<pre><code class="language-sql">select engine, sum(funding_usd_m) as total
+from vendors
+where funding_usd_m is not null
+group by engine
+having count(*) &gt;= 2;
+</code></pre>
+<p><strong>Returns:</strong> key-value 367, postgres 141.2.</p>
+<p><strong>Coaching.</strong> Three filters could apply, at three different moments, and knowing the order matters more than memorising the keywords.</p>
+<ol>
+<li><code>where</code> runs first, on individual rows, before any grouping exists.</li>
+<li><code>group by</code> collapses rows into groups.</li>
+<li><code>having</code> runs last, on the groups, and can see aggregates.</li>
+</ol>
+<p>Writing <code>where count(*) &gt;= 2</code> raises an error because <code>count(*)</code> does not exist yet when <code>where</code> executes. Writing <code>having funding_usd_m is not null</code> fails differently, because after grouping there is no single row to test.</p>
+<p>Notice what the result understates. Postgres shows 141.2 million and omits Supabase entirely, whose Series F alone was 500 million, because no total-raised figure appeared in the reporting. An aggregate over sparse data produces a number with a shape and a wrong magnitude, and it will be quoted by someone who never saw the <code>where</code> clause. Label such outputs "disclosed total" and never "total".</p>
+<hr />
+<h2 id="8-block-c--postgres-beyond-sql-92">8. Block C — Postgres beyond SQL-92</h2>
+<h3 id="drill-5--rank-inside-a-partition">Drill 5 · Rank inside a partition</h3>
+<p><strong>Brief.</strong> Best-funded vendor within each engine type, one row per engine.</p>
+<pre><code class="language-sql">with ranked as (
+  select engine, name, funding_usd_m,
+         row_number() over (partition by engine order by funding_usd_m desc) as rn
+  from vendors
+  where funding_usd_m is not null
+)
+select engine, name, funding_usd_m
+from ranked
+where rn = 1;
+</code></pre>
+<p><strong>Returns 5 rows:</strong> custom/Convex, duckdb/MotherDuck, key-value/Redis, postgres/Neon, sqlite/Turso.</p>
+<p><strong>Coaching.</strong> Window functions compute across a set of rows while leaving those rows intact, which is precisely what <code>group by</code> refuses to do. <code>partition by</code> slices the table; <code>order by</code> inside the <code>over</code> clause orders each slice independently.</p>
+<p>Filtering on the result needs a second query level, hence the CTE. A window function is evaluated after <code>where</code>, so <code>where rn = 1</code> in the same <code>select</code> that defines <code>rn</code> cannot work. Subquery or CTE, either is fine; the CTE reads better and costs nothing.</p>
+<p>Pick your ranking function deliberately:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Behaviour on ties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>row_number()</code></td>
+<td>Arbitrary but distinct numbering. Two tied rows get 1 and 2.</td>
+</tr>
+<tr>
+<td><code>rank()</code></td>
+<td>Ties share a number, then the sequence skips. 1, 1, 3.</td>
+</tr>
+<tr>
+<td><code>dense_rank()</code></td>
+<td>Ties share a number, no gap. 1, 1, 2.</td>
+</tr>
+</tbody>
+</table>
+<p><code>row_number()</code> with a tie gives you one winner chosen at random and no warning that a coin was flipped. Add a tiebreaker to the <code>order by</code> when determinism matters.</p>
+<hr />
+<h3 id="drill-6--reach-into-jsonb">Drill 6 · Reach into JSONB</h3>
+<p><strong>Brief.</strong> Every vendor whose <code>meta</code> records branching as true.</p>
+<pre><code class="language-sql">select name
+from vendors
+where meta @&gt; '{&quot;branching&quot;:true}';
+</code></pre>
+<p><strong>Returns:</strong> Neon, Supabase, Prisma Postgres.</p>
+<p><strong>Coaching.</strong> Two workable approaches, with different properties.</p>
+<pre><code class="language-sql">where meta @&gt; '{&quot;branching&quot;:true}'     -- containment; GIN-indexable
+where meta -&gt;&gt; 'branching' = 'true'    -- extract as text; compares strings
+</code></pre>
+<p>Containment tests whether the left document contains the right one, respects JSON types, and can use a GIN index. Extraction with <code>-&gt;&gt;</code> returns text, which means a JSON <code>true</code> and a JSON string <code>"true"</code> become indistinguishable, and no index helps. Reserve <code>-&gt;&gt;</code> for pulling a value out to display, and use <code>@&gt;</code> when filtering.</p>
+<p>Keep the difference between <code>-&gt;</code> and <code>-&gt;&gt;</code> in mind: the first returns <code>jsonb</code> and chains, the second returns <code>text</code> and terminates.</p>
+<p>Larger point about <code>jsonb</code> itself: it is a legitimate answer to genuinely irregular data and a very popular way to avoid schema design. When the same key appears in most rows and gets queried often, promote it to a real column. You gain type checking, constraints, cheaper indexes and a schema that documents itself.</p>
+<hr />
+<h2 id="9-block-d--operating-the-database">9. Block D — Operating the database</h2>
+<h3 id="drill-7--create-an-index-and-read-the-plan">Drill 7 · Create an index and read the plan</h3>
+<p><strong>Brief.</strong> Create a btree index named <code>idx_vendors_engine</code> on <code>vendors(engine)</code>.</p>
+<pre><code class="language-sql">create index idx_vendors_engine on vendors (engine);
+</code></pre>
+<p><strong>Verification.</strong> Checked against <code>pg_indexes</code> rather than a result set, since DDL returns no rows.</p>
+<p><strong>Coaching.</strong> Now run the interesting part:</p>
+<pre><code class="language-sql">explain analyze select * from vendors where engine = 'postgres';
+</code></pre>
+<p>Postgres ignores your index and performs a sequential scan. Correct behaviour: on fourteen rows spanning one page, reading everything costs less than consulting an index and then fetching rows. A planner that used every available index would be a worse planner.</p>
+<p>Understanding that refusal is the drill. Indexes earn their place when selectivity is high and the table is large; each one you add taxes every insert, update and delete, and consumes storage that on consumption billing appears on an invoice. <code>pg_stat_user_indexes</code> will show you which indexes in a real system have never been scanned, and the number is usually higher than anyone expects.</p>
+<p>Read <code>explain analyze</code> output from the innermost node outward. Compare the planner's estimated row counts against actual counts; large divergence usually means stale statistics, and <code>analyze</code> is the first thing to try.</p>
+<hr />
+<h3 id="drill-8--write-a-row-level-security-policy">Drill 8 · Write a row-level security policy</h3>
+<p><strong>Brief.</strong> Enable RLS on <code>vendors</code>, then grant public read access via a policy named <code>public_read</code>.</p>
+<pre><code class="language-sql">alter table vendors enable row level security;
+create policy public_read on vendors for select using (true);
+</code></pre>
+<p><strong>Verification.</strong> Checked against <code>pg_policies</code>.</p>
+<p><strong>Coaching.</strong> Worth more attention than any other drill on the floor, because it is core Postgres, it is fully portable, and Supabase builds an entire authorisation model on top of it. Learn it here and you have learned a large part of Supabase before opening an account.</p>
+<p>Mechanics. <code>enable row level security</code> switches the table to deny-by-default for ordinary roles. Policies then add back specific permissions. A <code>using</code> clause governs which existing rows a role may see or modify; a <code>with check</code> clause governs which new rows a role may write. Omitting <code>with check</code> on an <code>insert</code> or <code>update</code> policy is a standard way to build a table that correctly hides other tenants' rows and cheerfully lets anyone create rows belonging to them.</p>
+<p>Two traps to carry into production:</p>
+<ul>
+<li><strong>Superusers bypass RLS entirely</strong>, and so does the table owner unless you also issue <code>alter table vendors force row level security</code>. Testing a policy while connected as the owner proves nothing. PGlite connects you as superuser, so this drill can confirm that a policy exists but cannot demonstrate that it works.</li>
+<li><strong>Policies are evaluated per row.</strong> A policy calling a function or subquery runs it for every candidate row. Index the columns your policies test, or watch a simple query degrade badly at scale.</li>
+</ul>
+<hr />
+<h2 id="10-the-full-programme-what-a-complete-floor-looks-like">10. The full programme: what a complete floor looks like</h2>
+<p>Eight drills demonstrate the mechanism. A credible curriculum needs roughly forty to sixty, and the blocks below sketch the shape. Everything listed here is portable Postgres and can run entirely in the browser.</p>
+<p><strong>Block A — Reading rows (6–8 drills).</strong> Projection, predicates, three-valued logic, <code>is distinct from</code>, pattern matching, <code>coalesce</code>, <code>case</code>, ordering with collations, <code>limit</code> with <code>offset</code> and why keyset pagination beats it.</p>
+<p><strong>Block B — Combining tables (8–10 drills).</strong> All join types, self-joins, anti-joins via <code>not exists</code> versus <code>not in</code> and the <code>NULL</code> trap that separates them, set operations, <code>group by</code> with <code>rollup</code> and <code>grouping sets</code>, <code>filter</code> on aggregates, <code>distinct on</code> as a Postgres-specific shortcut.</p>
+<p><strong>Block C — Beyond SQL-92 (10–12 drills).</strong> Window frames beyond the default, running totals, lag and lead, recursive CTEs, arrays, ranges and exclusion constraints, full-text search with <code>tsvector</code>, <code>jsonb</code> paths and generated columns, pgvector similarity search with an HNSW index.</p>
+<p><strong>Block D — Operating (8–10 drills).</strong> Index types and when each applies, partial and expression indexes, reading <code>explain analyze</code>, statistics and <code>analyze</code>, transaction isolation levels, <code>select for update</code>, deadlock reproduction, constraints as documentation, RLS with multiple roles, <code>pg_stat_statements</code>.</p>
+<p><strong>Block E — Change over time (6–8 drills).</strong> Migrations as ordered, reversible, reviewed artefacts. Adding a column safely under load, backfilling without a long lock, <code>alter table</code> operations that rewrite versus those that do not, expand-contract deployment, and rehearsing a restore rather than assuming one.</p>
+<p>Block E cannot be fully exercised in a single-connection browser engine. Blocks A through D can.</p>
+<hr />
+<h2 id="11-codds-twelve-rules-tested">11. Codd's twelve rules, tested</h2>
+<p>Codd published twelve rules in <em>Computerworld</em> in October 1985, defining what a system must do to call itself relational. The practice floor carries a tier that judges Postgres against each one and provides a demonstration you can run.</p>
+<p>Findings, in brief. Nine honoured: the information rule, the catalog rule, the comprehensive sublanguage, set-at-a-time writes, physical data independence, integrity independence, and the foundation rule. Three partial: guaranteed access, since duplicate rows are permitted; view updating, since only simple views update through; and nonsubversion, since a superuser can suspend foreign key enforcement. One failed: systematic treatment of nulls, where Codd wanted two marks and SQL supplies one. One untestable on a single node: distribution independence, which remains the live commercial problem forty years on.</p>
+<p>Rules 8, 9 and 12 are arguments that logical meaning must stay independent of implementation. That is the same case as the transfer ratings in section 12, made twenty-five years earlier and with better foundations.</p>
+<p><strong>Sources.</strong> The ACM Digital Library became fully open access on 1 January 2026, so Codd's papers are free to read. <em>A Relational Model of Data for Large Shared Data Banks</em>, CACM 13(6), 1970, at doi.org/10.1145/362384.362685. On nulls specifically, <em>Missing Information (Applicable and Inapplicable) in Relational Databases</em>, SIGMOD Record 15, 1986. The twelve rules appeared in trade press rather than in ACM and are restated rather than reproduced.</p>
+<hr />
+<h2 id="12-the-machines-platform-training-briefs">12. The machines: platform training briefs</h2>
+<p>One machine at a time. Each brief assumes the floor is complete and states what to build, what it costs, and what leaves with you.</p>
+<h3 id="neon--branching">Neon — branching</h3>
+<p><em>Owner: Databricks, acquired for roughly $1bn in May 2025. Transfer rating 85%.</em></p>
+<p>Copy-on-write storage makes a branch a metadata operation rather than a copy, so a database branch costs about what a Git branch costs. Compute suspends when idle.</p>
+<p><strong>Session.</strong> Provision a project. Create a branch from <code>main</code> and observe the elapsed time. Load a few hundred thousand rows, branch again, confirm that storage barely moves. Wire branch-per-pull-request into a CI pipeline so every review gets an isolated database seeded with production-shaped data. Let a branch idle and watch compute scale to zero. Reset a branch from its parent after deliberately corrupting it.</p>
+<p><strong>Leaves with you.</strong> Branch-per-environment as a working practice; you will want it everywhere afterwards. <strong>Stays behind.</strong> Neon's branch API and console.</p>
+<p>Docs: <code>neon.com/docs</code> · Branching: <code>neon.com/docs/introduction/branching</code></p>
+<hr />
+<h3 id="supabase--row-level-security-and-the-generated-api">Supabase — row-level security and the generated API</h3>
+<p><em>Independent. $500m Series F led by GIC at $10.5bn post-money, June 2026. Transfer rating 70%.</em></p>
+<p>Postgres surrounded by auth, storage, realtime subscriptions and Deno-based edge functions. PostgREST exposes tables as a REST API directly from the schema.</p>
+<p><strong>Session.</strong> Design a two-tenant schema. Write RLS policies for select, insert, update and delete, each with both <code>using</code> and <code>with check</code> where applicable. Create two users and verify from each side that isolation holds. Only then enable the generated API and confirm that policies govern it, because PostgREST enforces nothing on its own. Add a realtime subscription. Store embeddings with pgvector and query them with plain SQL alongside relational columns.</p>
+<p><strong>Leaves with you.</strong> The RLS work, entirely: it is core Postgres. <strong>Stays behind.</strong> Supabase Auth, Storage, Edge Functions and the client SDK.</p>
+<p>Docs: <code>supabase.com/docs</code> · RLS: <code>supabase.com/docs/guides/database/postgres/row-level-security</code></p>
+<hr />
+<h3 id="amazon-aurora-postgresql--procurement-reality">Amazon Aurora PostgreSQL — procurement reality</h3>
+<p><em>Amazon Web Services. Transfer rating 65%.</em></p>
+<p>Default corporate answer, and the one that clears an enterprise review without argument. Regained scale-to-zero capability in late 2024 and became discountable through Database Savings Plans introduced December 2025.</p>
+<p><strong>Session.</strong> Provision Serverless v2 inside a VPC. Configure IAM database authentication rather than a password. Change a parameter group and note which changes force a restart. Create a read replica and measure lag. Restore to a point in time. Price the same workload against Neon and Supabase, then price it again including the engineering hours the VPC and IAM work consumed.</p>
+<p><strong>Leaves with you.</strong> Postgres tuning, replication concepts. <strong>Stays behind.</strong> VPC topology, IAM policy, parameter groups, Savings Plan commitments.</p>
+<p>Docs: <code>docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/</code></p>
+<hr />
+<h3 id="aurora-dsql--distributed-writes">Aurora DSQL — distributed writes</h3>
+<p><em>Amazon Web Services. Generally available May 2025. Transfer rating 55%.</em></p>
+<p>Postgres-compatible distributed SQL with multi-region strong consistency, billed by distributed processing unit.</p>
+<p><strong>Session.</strong> Provision a multi-region cluster. Write to two regions concurrently and confirm both reads agree. Then find the limits: DSQL restricts several things ordinary Postgres allows, and the restrictions are the product. Measure write latency against single-region Aurora and decide whether your application genuinely requires global writes, since most do not.</p>
+<p><strong>Leaves with you.</strong> A grounded sense of what distributed consensus costs. <strong>Stays behind.</strong> Everything else.</p>
+<p>Docs: <code>docs.aws.amazon.com/aurora-dsql/</code></p>
+<hr />
+<h3 id="prisma-postgres--schema-as-code">Prisma Postgres — schema as code</h3>
+<p><em>Independent, funding position undisclosed. Transfer rating 70%.</em></p>
+<p>A TypeScript ORM company moved down the stack into hosting, running on unikernel microVMs and billing per operation.</p>
+<p><strong>Session.</strong> Model a schema in Prisma's DSL, generate and apply migrations, then read the SQL those migrations produced and judge it. Introspect an existing database into a schema file. Price a read-heavy workload under per-operation billing against per-hour billing elsewhere; the crossover point is the lesson.</p>
+<p><strong>Leaves with you.</strong> Migrations as reviewed, versioned artefacts. <strong>Stays behind.</strong> Prisma's DSL and client. Note that the corporate funding position is undisclosed, which is information in itself for a long-lived dependency.</p>
+<p>Docs: <code>prisma.io/docs/postgres</code></p>
+<hr />
+<h3 id="nile--multi-tenancy-as-a-primitive">Nile — multi-tenancy as a primitive</h3>
+<p><em>Independent. $11.6m seed led by Benchmark. Transfer rating 60%.</em></p>
+<p>The tenant is built into Postgres rather than bolted on with a <code>tenant_id</code> column and vigilance.</p>
+<p><strong>Session.</strong> Build the same two-tenant schema twice: once with conventional columns plus RLS, once with Nile's tenant primitive. Compare query ergonomics and the number of places a bug could leak data across tenants. Then weigh a seed-stage supplier against a production dependency, which is a commercial judgement rather than a technical one.</p>
+<p>Docs: <code>thenile.dev/docs</code></p>
+<hr />
+<h3 id="turso--many-small-databases">Turso — many small databases</h3>
+<p><em>Independent, roughly $7m seed. Transfer rating 60%.</em></p>
+<p>SQLite rewritten from scratch in Rust, adding concurrent writes and vector search, with an experimental Postgres frontend launched July 2026.</p>
+<p><strong>Session.</strong> Provision a database per user rather than per application and note how the mental model shifts: backups, migrations and quotas all become per-tenant problems with per-tenant solutions. Test the Postgres frontend and treat "experimental" as accurate.</p>
+<p>Docs: <code>docs.turso.tech</code></p>
+<hr />
+<h3 id="convex--a-different-bargain">Convex — a different bargain</h3>
+<p><em>Independent. $24m led by Andreessen Horowitz, co-led by Spark Capital. Transfer rating 20%.</em></p>
+<p>Schema, queries, authorisation and scheduled work all expressed in TypeScript, reactive by default.</p>
+<p><strong>Session.</strong> Build a collaborative document editor where several people see the same change simultaneously. Then build it again on Postgres with a websocket layer and count the assembly work Convex removed. That comparison is the only honest way to evaluate a 20% transfer rating: the question is whether what you gain now outweighs a migration you cannot perform later.</p>
+<p>Docs: <code>docs.convex.dev</code></p>
+<hr />
+<h3 id="dynamodb--access-patterns-first">DynamoDB — access patterns first</h3>
+<p><em>Amazon Web Services. Transfer rating 15%.</em></p>
+<p>Heaviest switching cost in the field. On-demand throughput pricing halved in November 2024 and replicated write costs for global tables fell by up to 67%.</p>
+<p><strong>Session.</strong> Enumerate every access pattern your application needs before creating a table, because that ordering is compulsory here. Design a single-table layout with composite keys and a global secondary index. Then invent a new access pattern nobody anticipated and discover what it costs. Single-table design is a genuine skill and a genuine trap, and doing it once teaches you which of your workloads should never leave SQL.</p>
+<p>Docs: <code>docs.aws.amazon.com/amazondynamodb/</code></p>
+<hr />
+<h3 id="redis-and-valkey--upstash--mongodb-atlas--motherduck">Redis and Valkey · Upstash · MongoDB Atlas · MotherDuck</h3>
+<p>Shorter briefs, same method.</p>
+<p><strong>Redis / Valkey</strong> (75%): expiry and eviction policy, cache-aside versus write-through, and confirming that your commands run unchanged against the Linux Foundation fork created after the 2024 licence change. Portability was the entire point of that fork.</p>
+<p><strong>Upstash</strong> (70%): per-request billing for cache, queue and vector, so idle infrastructure costs nothing. Model a spiky workload and find where per-request economics stop beating a provisioned instance.</p>
+<p><strong>MongoDB Atlas</strong> (25%): document modelling and the aggregation pipeline, which is entirely its own vocabulary. Worth study as the only challenger with audited figures — FY2026 revenue of $2.46bn with Atlas growing 29% — against which private valuations elsewhere can be sanity-checked.</p>
+<p><strong>MotherDuck</strong> (70%): DuckDB is free, local and close enough to Postgres SQL to feel familiar. Load a dataset larger than memory, then decide honestly whether your organisation ever had the data volumes that justified a distributed warehouse.</p>
+<hr />
+<h2 id="13-spotters-giving-an-agent-database-access-without-regret">13. Spotters: giving an agent database access without regret</h2>
+<p>Three patterns cover the field.</p>
+<p><strong>Native.</strong> Platform ships one database and hides the wiring. Lovable and Bolt.new default to Supabase; Replit Agent embeds managed Postgres; v0 provisions from Vercel's marketplace; Databricks bought Neon outright and folded it in as Lakebase. Fastest path to a running application, and the database ends up chosen by whoever wrote the platform's integration rather than by you.</p>
+<p><strong>MCP.</strong> More consequential development. Model Context Protocol servers let a coding agent — Claude Code, Cursor, Windsurf, VS Code — inspect schema and execute queries against a database you already own. Neon's server offers branch-based migration safety and runtime scoping headers. Supabase ships OAuth-based MCP. Postgres MCP Pro handles self-hosted instances with index tuning and plan analysis. DBHub covers several engines at a fraction of the token cost. Google's MCP Toolbox spans 40+ data sources.</p>
+<p><strong>BYO.</strong> Paste a connection string into a chat window. No provisioning, no scoping, and all of the risk.</p>
+<h3 id="safety-practice-in-order">Safety practice, in order</h3>
+<ol>
+<li><strong>Start read-only.</strong> Every database MCP server worth using ships a read-only mode. Use it for a week before considering anything else.</li>
+<li><strong>Scope the credential, not the intention.</strong> Grant a role with the narrowest privileges on one schema. A prompt asking an agent to be careful is not an access control.</li>
+<li><strong>Write access only against a restorable database.</strong> Branch it, or point at a copy. Neon's branch-based migration flow exists for exactly this and is the standout feature in the category.</li>
+<li><strong>Read the tool list.</strong> Servers expose twenty to thirty tools. Know which ones drop things.</li>
+<li><strong>Assume the context is hostile.</strong> An agent reading query results is reading data that other people wrote. Treat retrieved content as data, never as instructions.</li>
+</ol>
+<p>Vercel's own history supplies the closing argument: an OAuth supply-chain compromise at a third-party tool exposed unencrypted environment variables across its ecosystem. Credentials handed to an integration are credentials handed to everyone that integration trusts.</p>
+<hr />
+<h2 id="14-maintenance-protocol-keeping-this-from-rotting">14. Maintenance protocol: keeping this from rotting</h2>
+<p>Half of this manual will still be accurate in 2036. The other half has a shelf life measured in months, and mixing them without labels is how a teaching resource becomes a source of misinformation.</p>
+<p><strong>Effectively permanent.</strong> Sections 3 and 6 to 10. SQL semantics, <code>NULL</code> behaviour, window functions, indexing, RLS mechanics. Postgres changes by addition; almost nothing here will be invalidated.</p>
+<p><strong>Review every six months.</strong> Section 12 training sessions. Console flows and feature names drift; the underlying exercises rarely do.</p>
+<p><strong>Review quarterly, and date every claim.</strong> Ownership, funding, valuation, pricing, transfer ratings. Recent months alone brought a $1bn acquisition, a $500m round at $10.5bn, a $300m ARR disclosure followed by layoffs, an experimental Postgres frontend from a twenty-person company, and one major platform exiting storage to become a broker. A card asserting a 2026 fact in 2027 is worse than a card asserting nothing.</p>
+<p><strong>Implementation note.</strong> Volatile facts live in exactly two places in the prototype: the <code>MACHINES</code> array and the <code>SEED</code> string, both in the single JavaScript block. Regenerating both from a fresh source review is a contained task. Keeping them contained is the maintenance design, and scattering vendor claims into prose would undo it.</p>
+<p><strong>Sourcing rule.</strong> Every figure here traces to reporting dated 27 July 2026. Undisclosed values are recorded as undisclosed. No figure has been estimated, interpolated, or inferred from a comparable. Extending this manual under any looser standard would make the whole document unreliable, because a reader has no way to tell which numbers were sourced and which were filled in.</p>
+<hr />
+<h2 id="appendix-a--quick-reference-card">Appendix A — Quick reference card</h2>
+<p><strong>Clause execution order</strong>, which differs from writing order and explains most confusing errors:</p>
+<pre><code>from → where → group by → having → select → window → order by → limit
+</code></pre>
+<p><strong>Null handling</strong></p>
+<pre><code class="language-sql">coalesce(x, 0)              -- substitute a default
+nullif(x, '')               -- turn a sentinel back into NULL
+x is distinct from y        -- equality that treats NULL as a value
+count(*) vs count(col)      -- second one skips NULLs
+order by col desc nulls last
+</code></pre>
+<p><strong>Joins</strong></p>
+<pre><code class="language-sql">inner join   -- rows matching on both sides
+left join    -- all left rows, nulls where no match
+full join    -- everything, nulls on both sides as needed
+where r.id is null           -- after a left join: the anti-join
+not exists (select 1 ...)    -- anti-join that survives NULLs
+not in (select ...)          -- returns nothing if the subquery yields one NULL
+</code></pre>
+<p><strong>Windows</strong></p>
+<pre><code class="language-sql">row_number() over (partition by a order by b)
+rank() | dense_rank() | lag(x, 1) | lead(x, 1)
+sum(x) over (order by d rows between unbounded preceding and current row)
+</code></pre>
+<p><strong>JSONB</strong></p>
+<pre><code class="language-sql">meta -&gt; 'k'                  -- returns jsonb, chains
+meta -&gt;&gt; 'k'                 -- returns text, terminates
+meta @&gt; '{&quot;k&quot;:true}'         -- containment, GIN-indexable
+jsonb_path_query(meta, '$.a.b')
+</code></pre>
+<p><strong>Operations</strong></p>
+<pre><code class="language-sql">explain (analyze, buffers) select ...;
+create index concurrently ... ;          -- no write lock, slower
+create index ... where active;           -- partial index
+select * from pg_stat_user_indexes;      -- find unused indexes
+alter table t enable row level security;
+alter table t force row level security;  -- applies to the owner too
+create policy p on t for select using (tenant_id = current_tenant());
+</code></pre>
+<hr />
+<h2 id="appendix-b--glossary">Appendix B — Glossary</h2>
+<p><strong>Branching</strong> — creating an isolated copy of a database via metadata rather than by copying bytes, so cost and elapsed time stay near zero regardless of size.</p>
+<p><strong>Consumption billing</strong> — charging by units used (compute-hour, request, operation, distributed processing unit) rather than by provisioned capacity.</p>
+<p><strong>CTE</strong> — common table expression, a named subquery introduced by <code>with</code>, used here to make window-function results filterable.</p>
+<p><strong>GIN index</strong> — generalised inverted index, suited to containment queries over <code>jsonb</code>, arrays and full-text vectors.</p>
+<p><strong>HNSW</strong> — hierarchical navigable small world, the graph index pgvector uses for approximate nearest-neighbour search.</p>
+<p><strong>MCP</strong> — Model Context Protocol, a specification for exposing tools and data to language models, and currently the main route by which coding agents reach databases.</p>
+<p><strong>pgvector</strong> — Postgres extension storing embedding vectors and running similarity search in SQL, removing the need for a separate vector database in many applications.</p>
+<p><strong>PGlite</strong> — Postgres compiled to WebAssembly by ElectricSQL, under 3MB gzipped, running the practice floor.</p>
+<p><strong>Row-level security</strong> — Postgres feature restricting which rows a role may see or modify, enforced by the database rather than by application code.</p>
+<p><strong>Scale to zero</strong> — suspending compute entirely when a database is idle, so an unused database costs only storage.</p>
+<p><strong>Transfer rating</strong> — this manual's editorial estimate of how much of the training on a given platform survives a move to a different supplier.</p>
+<p><strong>Wire compatibility</strong> — implementing the Postgres client-server protocol, so existing drivers, ORMs and tools connect without modification. The organising fact of the current market.</p>
+<hr />
+<p><em>Practice floor: <code>postgres-gym.html</code>. Engine: PGlite (Postgres 17, WASM). No account, no analytics, no data leaving the browser. Vendor figures compiled 27 July 2026 and subject to the review schedule in section 14.</em></p></main>
+</div></body></html>
