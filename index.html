@@ -158,6 +158,11 @@ table.spot td:first-child{font-weight:800;white-space:nowrap}
 .orient p:last-child{margin-bottom:0}
 .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:16px}
 .tier{border:2px solid #4C5862;padding:12px}
+.tier{text-decoration:none;color:inherit;display:block;cursor:pointer;transition:border-color .15s,background .15s}
+a.tier:hover{border-color:var(--plate);background:#212A32}
+a.tier:hover b{text-decoration:underline;text-underline-offset:3px}
+.tier::after{content:"View \2192";display:block;margin-top:9px;font-family:"IBM Plex Mono",monospace;
+  font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--plate)}
 .tier b{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--plate);margin-bottom:4px}
 .tier span{font-size:13.5px;color:#C2CBD3;line-height:1.45}
 .tier.here{border-color:var(--plate);background:#212A32}
@@ -229,7 +234,7 @@ footer p{max-width:64ch}
       <a href="#floor">Floor</a>
       <a href="#machines">Machines</a>
       <a href="#spotters">Spotters</a>
-      <a href="postgres-gym-manual.md">Manual</a>
+      <a href="manual.html">Manual</a>
     </nav>
   </div>
 </header>
@@ -266,10 +271,10 @@ footer p{max-width:64ch}
       <p><b>What Postgres is.</b> A program that stores tables and answers questions about them. A table is rows and columns, much like a spreadsheet, except the rules about what may go in each column are enforced rather than hoped for. Postgres began at Berkeley in 1986, so it is neither new nor a new kind of thing. Everyone is building on it now because it is old, free, and has stopped surprising people.</p>
       <p><b>What the questions look like.</b> You ask in SQL, a language designed to read almost like English: <code style="background:#2A333C;padding:1px 6px">select name from vendors where owner = 'Amazon'</code>. Six lessons below take you from nothing to reading that comfortably.</p>
       <div class="tiers">
-        <div class="tier here"><b>1 · Induction</b><span>Six guided lessons. Each one explains an idea, shows a worked example you can run, then asks you to try a variation. You are here.</span></div>
-        <div class="tier"><b>2 · The Theory</b><span>Codd's twelve rules, judged against the database on this page. Read-only unless you want to run the evidence.</span></div>
-        <div class="tier"><b>3 · The Floor</b><span>Eight harder drills with no worked example. Portable Postgres that transfers to any vendor.</span></div>
-        <div class="tier"><b>4 · The Machines</b><span>Fourteen platform cards. What each company sells, and how much of it you keep if you leave.</span></div>
+        <a class="tier here" href="#induction"><b>1 · Induction</b><span>Six guided lessons. Each one explains an idea, shows a worked example you can run, then asks you to try a variation. You are here.</span></a>
+        <a class="tier" href="#theory"><b>2 · The Theory</b><span>Codd's twelve rules, judged against the database on this page. Read-only unless you want to run the evidence.</span></a>
+        <a class="tier" href="#floor"><b>3 · The Floor</b><span>Eight harder drills. Each shows a worked example first, then asks for a harder variation on the same idea.</span></a>
+        <a class="tier" href="#machines"><b>4 · The Machines</b><span>Fourteen platform cards. What each company sells, and how much of it you keep if you leave.</span></a>
       </div>
     </div>
 
@@ -303,7 +308,7 @@ footer p{max-width:64ch}
       <h2>The Floor</h2>
       <span class="tag port">Portable · transfers to every vendor</span>
     </div>
-    <p class="sec-lede">Free-weight work. Everything here is ANSI SQL or core Postgres, so it survives a migration from Neon to Supabase to Aurora to a box under your desk. Write a query, run it, and the checker compares your result against a reference answer — any query that returns the right rows passes.</p>
+    <p class="sec-lede">Free-weight work. Everything here is ANSI SQL or core Postgres, so it survives a migration from Neon to Supabase to Aurora to a box under your desk. Each drill shows a worked example you can run, then sets a related task. The checker compares your result against a reference answer — any query that returns the right rows passes.</p>
     <div class="notice" style="margin-top:0;margin-bottom:24px">
       <b>About the seed data.</b> Two tables, <span class="mono">vendors</span> and <span class="mono">rounds</span>, holding the database market itself as reported on 27 July 2026. Only figures stated in the source reporting are present; everything undisclosed is <span class="mono">NULL</span> rather than guessed. Half the difficulty in real SQL comes from missing values, so the drills lean into it.
     </div>
@@ -363,7 +368,6 @@ create table vendors (
   engine text not null,
   wire_compatible boolean not null,
   billing_unit text,
-  founded int,
   funding_usd_m numeric,
   valuation_usd_m numeric,
   meta jsonb
@@ -408,42 +412,56 @@ const DRILLS = [
  {block:'Block A — reading rows',
   title:'Filter on a boolean',
   brief:'Return the name and engine of every vendor that speaks the Postgres wire protocol. Two columns, any order.',
+  eg:"select name, engine\nfrom vendors\nwhere engine = 'postgres';",
+  egnote:"Same shape as the task: two columns after <b>select</b>, one condition after <b>where</b>. Here the condition compares a text column to a quoted value. Your task filters on a column that is already true or false, so it needs no comparison at all.",
   starter:'select name, engine\nfrom vendors\nwhere -- your predicate here\n;',
   ref:'select name, engine from vendors where wire_compatible'},
 
  {block:'Block A — reading rows',
   title:'Sort, then cut',
   brief:'Which three vendors raised the most disclosed funding? Return name and funding_usd_m, largest first. Rows with no disclosed figure must not crowd out real ones — Postgres sorts NULL as largest by default under DESC.',
+  eg:"select name, valuation_usd_m\nfrom vendors\nwhere valuation_usd_m is not null\norder by valuation_usd_m desc\nlimit 2;",
+  egnote:"The full pattern: exclude the unknowns, sort largest first, cut to a fixed number of rows. Your task does the same on a different column, keeping three.",
   starter:'select name, funding_usd_m\nfrom vendors\n;',
   ref:'select name, funding_usd_m from vendors where funding_usd_m is not null order by funding_usd_m desc limit 3'},
 
  {block:'Block B — combining tables',
   title:'Join across the foreign key',
   brief:'Every funding round with the vendor it belongs to. Return vendor name, stage, amount_usd_m and lead_investor. The link is rounds.vendor_id to vendors.id.',
+  eg:"select v.name, r.closed_year\nfrom rounds r\njoin vendors v on v.id = r.vendor_id;",
+  egnote:"A join in its simplest form. <b>from rounds r</b> names the driving table and gives it the short alias r; <b>join vendors v on ...</b> attaches the matching vendor row. Your task returns this same join with two more columns.",
   starter:'select v.name, r.stage, r.amount_usd_m, r.lead_investor\nfrom rounds r\n-- join here\n;',
   ref:'select v.name, r.stage, r.amount_usd_m, r.lead_investor from rounds r join vendors v on v.id = r.vendor_id'},
 
  {block:'Block B — combining tables',
   title:'Aggregate, then filter the groups',
   brief:'Total disclosed funding by engine type, keeping only engine types with at least two vendors that disclosed a figure. Return engine and a column named total. Filtering on an aggregate needs HAVING; WHERE runs too early to see it.',
+  eg:"select owner, count(*) as n\nfrom vendors\ngroup by owner\nhaving count(*) >= 2;",
+  egnote:"Group, count, then filter the groups. Note <b>having</b> rather than <b>where</b>: the count does not exist until after grouping has happened. Your task groups on a different column and sums instead of counting.",
   starter:'select engine, sum(funding_usd_m) as total\nfrom vendors\nwhere funding_usd_m is not null\n;',
   ref:'select engine, sum(funding_usd_m) as total from vendors where funding_usd_m is not null group by engine having count(*) >= 2'},
 
  {block:'Block C — Postgres beyond SQL-92',
   title:'Rank inside a partition',
   brief:'For each engine type, find the best-funded vendor among those that disclosed a figure. Return engine, name, funding_usd_m — one row per engine. A window function ranks within the partition, and a CTE gives you somewhere to filter it: a window function cannot appear in the WHERE of the same SELECT that defines it.',
+  eg:"select name, funding_usd_m,\n       row_number() over (order by funding_usd_m desc nulls last) as rn\nfrom vendors;",
+  egnote:"A window function numbering every row by funding. Your task adds <b>partition by</b> so the numbering restarts within each engine, and wraps it in a CTE so you can keep only the rows where rn = 1.",
   starter:'with ranked as (\n  select engine, name, funding_usd_m,\n         -- window function here, aliased rn\n  from vendors\n  where funding_usd_m is not null\n)\nselect engine, name, funding_usd_m from ranked;',
   ref:`with ranked as (select engine,name,funding_usd_m, row_number() over (partition by engine order by funding_usd_m desc) rn from vendors where funding_usd_m is not null) select engine,name,funding_usd_m from ranked where rn=1`},
 
  {block:'Block C — Postgres beyond SQL-92',
   title:'Reach into JSONB',
   brief:'The meta column holds semi-structured vendor attributes. Return the name of every vendor whose meta records branching as true. The ->> operator extracts a value as text; @> tests containment.',
+  eg:"select name\nfrom vendors\nwhere meta @> '{\"realtime\":true}';",
+  egnote:"Containment: keep rows whose meta document contains this key and value. Your task uses the identical operator on a different key.",
   starter:"select name\nfrom vendors\nwhere meta -- your JSONB test\n;",
   ref:`select name from vendors where meta @> '{"branching":true}'`},
 
  {block:'Block D — operating the database',
   title:'Create an index and read the plan',
   brief:'Create a btree index named idx_vendors_engine on vendors(engine). This drill checks the catalogue rather than a result set — run it, then hit Check. Afterwards, try EXPLAIN ANALYZE on a filtered query to see whether the planner takes it (on fourteen rows it will not, and knowing why matters more than the index).',
+  eg:"create index idx_vendors_owner on vendors (owner);\nselect indexname from pg_indexes where tablename = 'vendors';",
+  egnote:"Creating an index, then confirming it landed by querying the catalog. Your task creates one on a different column, under a specific name the checker looks for.",
   starter:'create index ...;',
   probe:`select 1 from pg_indexes where indexname='idx_vendors_engine' and tablename='vendors'`,
   probeLabel:'index idx_vendors_engine exists'},
@@ -451,6 +469,8 @@ const DRILLS = [
  {block:'Block D — operating the database',
   title:'Write a row-level security policy',
   brief:'Row-level security is core Postgres, and it is the foundation Supabase builds its whole authorisation model on. Enable RLS on vendors, then create a policy named public_read that grants SELECT to everyone using a true condition. Two statements, semicolon-separated.',
+  eg:"create table demo_rls (x int);\nalter table demo_rls enable row level security;\ncreate policy demo_read on demo_rls for select using (true);\nselect policyname from pg_policies where tablename = 'demo_rls';",
+  egnote:"The whole pattern on a throwaway table: enable RLS, add a named policy, confirm it in the catalog. Your task does those same three things on <b>vendors</b>, with the policy named public_read.",
   starter:"alter table vendors ...;\ncreate policy public_read on vendors ...;",
   probe:`select 1 from pg_policies where tablename='vendors' and policyname='public_read'`,
   probeLabel:'policy public_read exists on vendors'}
@@ -536,6 +556,15 @@ function renderDrills(){
       <summary><span class="num">${String(i+1).padStart(2,'0')}</span>
         <span class="ttl">${d.title}</span><span class="st">Not started</span></summary>
       <div class="drill-body">
+        <div class="sub">Worked example</div>
+        <div class="pad">
+          <textarea id="de${i}" spellcheck="false" style="min-height:${40+d.eg.split('\n').length*21}px">${d.eg}</textarea>
+          <div class="drow"><button data-deg="${i}">Run this example</button>
+            <span class="hint">Editable — poke at it</span></div>
+        </div>
+        <div id="deo${i}" class="out" style="padding-left:0;padding-right:0"></div>
+        <p class="egnote">${d.egnote}</p>
+        <div class="sub">Your turn</div>
         <p class="brief">${d.brief}</p>
         <div class="pad">
           <textarea id="t${i}" spellcheck="false">${d.starter}</textarea>
@@ -562,7 +591,9 @@ async function boot(){
     await db.exec(SEED);
     ready = true;
     $('#engDot').className='dot live';
-    $('#engStatus').textContent='Postgres ready · 14 vendors, 10 rounds seeded';
+    const nv=(await db.query('select count(*) c from vendors')).rows[0].c;
+    const nr=(await db.query('select count(*) c from rounds')).rows[0].c;
+    $('#engStatus').textContent=`Postgres ready · ${nv} vendors, ${nr} rounds seeded`;
     $('#runScratch').disabled=false; $('#schemaBtn').disabled=false;
     runScratch();
   }catch(e){
@@ -649,6 +680,7 @@ function score(){
 
 document.addEventListener('click', e=>{
   const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.deg!==undefined) runInto(document.getElementById('de'+b.dataset.deg).value,'deo'+b.dataset.deg);
   if(b.dataset.rrun!==undefined) runInto(document.getElementById('rs'+b.dataset.rrun).value,'ro'+b.dataset.rrun);
   if(b.dataset.eg!==undefined) runInto(document.getElementById('eg'+b.dataset.eg).value,'ego'+b.dataset.eg);
   if(b.dataset.lrun!==undefined) runInto(document.getElementById('lt'+b.dataset.lrun).value,'lo'+b.dataset.lrun);
